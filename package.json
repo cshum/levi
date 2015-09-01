@@ -1,0 +1,28 @@
+{
+  "name": "levl",
+  "version": "0.0.1",
+  "description": "",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "rimraf": "^2.4.2",
+    "standard": "^5.1.0",
+    "tape": "^4.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cshum/levl.git"
+  },
+  "author": "Adrian C Shum",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cshum/levl/issues"
+  },
+  "homepage": "https://github.com/cshum/levl",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "standard && node test/test.js"
+  }
+}
