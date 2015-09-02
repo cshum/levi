@@ -1,5 +1,5 @@
 {
-  "name": "levl",
+  "name": "levi",
   "version": "0.0.1",
   "description": "",
   "dependencies": {
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cshum/levl.git"
+    "url": "https://github.com/cshum/levi.git"
   },
   "author": "Adrian C Shum",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cshum/levl/issues"
+    "url": "https://github.com/cshum/levi/issues"
   },
-  "homepage": "https://github.com/cshum/levl",
+  "homepage": "https://github.com/cshum/levi",
   "directories": {
     "test": "test"
   },
