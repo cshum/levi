@@ -4,11 +4,16 @@ var ginga = require('ginga')
 var xtend = require('xtend')
 var transaction = require('level-transactions')
 var H = require('highland')
+var iterate = require('./iterate')
+var through = require('through2')
 
-var defaults = {}
-defaults.db = process.browser ?
-  require('leveldown') :
-  require('level-js')
+var defaults = {
+  db: process.browser ? require('leveldown') : require('level-js')
+}
+var override = {
+  keyEncoding: 'utf8',
+  valueEncoding: 'json'
+}
 
 function params () {
   var names = Array.prototype.slice.call(arguments)
@@ -24,7 +29,7 @@ function Levi (dir, opts) {
   if (!(this instanceof Levi)) {
     return new Levi(dir, opts)
   }
-  opts = xtend(defaults, opts)
+  opts = xtend(defaults, opts, override)
   var db = typeof dir === 'string' ?
     sublevel(levelup(dir, opts)) :
     sublevel(dir, opts)
@@ -32,33 +37,57 @@ function Levi (dir, opts) {
   this.options = db.options
   this.store = db
   this.tokens = db.sublevel('tokens')
+
+  // token: token!key -> tf
 }
 
 var L = ginga(Levi.prototype)
 
+L.define('get', params('key', 'options'), function (ctx, done) {
+  ctx.options = xtend(this.options, ctx.options)
+  this.store.get(ctx.key, function (err, doc) {
+    done(err, doc ? doc.value : null)
+  })
+})
+
 function pre (ctx) {
   ctx.options = xtend(this.options, ctx.options)
-}
-
-function get (ctx, done) {
-  this.store.get(ctx.key, ctx.options, done)
-}
-
-function put (ctx, done) {
-  // todo: del current index, put new index
-  var tx = transaction(this.store)
-  tx.get(ctx.key, function (err, value) {
+  ctx.tx = transaction(this.store)
+  ctx.on('end', function (err) {
+    if(err && !err.notFound) ctx.tx.rollback(err)
   })
 }
 
-function del (ctx, done) {
-  // todo: del current index
-
+function clean (ctx, next) {
+  var self = this
+  ctx.tx.get(ctx.key, function (err, doc) {
+    if(!value) return next()
+    ctx.value = doc.value
+    ctx.tx.del(ctx.key)
+    ctx.tokens = doc.tokens
+    // todo delete all tokens that contains key
+    doc.tokens.forEach(function (token) {
+      self.tokens.del(token + '!' + ctx.key)
+    })
+    next()
+  })
 }
 
-L.define('get', params('key', 'options'), pre, get)
-L.define('del', params('key', 'options'), pre, put)
-L.define('put', params('key', 'value', 'options'), pre, del)
+function index (ctx, next) {
+}
+
+function commit (ctx, done) {
+  ctx.tx.commit(done)
+}
+
+L.define('del', params('key', 'options'), pre, clean, commit)
+L.define('put', params('key', 'value', 'options'), pre, clean, index, commit)
+L.define('rebuild', params('key', 'options'), pre, clean, index, commit)
+
+L.define('tokenize', params('value'), function (ctx, done) {
+  if(ctx.tokens) done(new Error()) // todo: no tokenize pipeline error
+  else done(null, ctx.tokens)
+})
 
 L.createSearchStream = 
 L.searchStream = function (q, opts) {
