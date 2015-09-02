@@ -6,6 +6,8 @@ var xtend = require('xtend')
 var H = require('highland')
 var iterate = require('./iterate')
 var through = require('through2')
+var EventEmitter = require('events').EventEmitter
+var inherits = require('util').inherits 
 
 var defaults = {
   db: process.browser ? require('leveldown') : require('level-js'),
@@ -37,9 +39,13 @@ function Levi (dir, opts) {
   this.store = db
   this.tokens = db.sublevel('tokens')
 
+  EventEmitter.call(this)
+  this.setMaxListeners(Infinity)
+
   // token: token!key -> tf
 }
 
+inherits(Levi, EventEmitter)
 var L = ginga(Levi.prototype)
 
 L.define('get', params('key', 'options'), function (ctx, done) {
