@@ -9,9 +9,7 @@ var through = require('through2')
 
 var defaults = {
   db: process.browser ? require('leveldown') : require('level-js'),
-  fields: {
-    '*': true
-  }
+  fields: { '*': true }
 }
 var override = {
   keyEncoding: 'utf8',
@@ -22,9 +20,7 @@ function params () {
   var names = Array.prototype.slice.call(arguments)
   var l = names.length
   return function (ctx) {
-    for(var i = 0; i < l; i++) {
-      ctx[names[i]] = ctx.args[i];
-    }
+    for (var i = 0; i < l; i++) ctx[names[i]] = ctx.args[i]
   }
 }
 
@@ -57,14 +53,15 @@ function pre (ctx) {
   ctx.options = xtend(this.options, ctx.options)
   ctx.tx = transaction(this.store)
   ctx.on('end', function (err) {
-    if(err && !err.notFound) ctx.tx.rollback(err)
+    if (err && !err.notFound) ctx.tx.rollback(err)
   })
 }
 
 function clean (ctx, next) {
   var self = this
   ctx.tx.get(ctx.key, function (err, doc) {
-    if(!value) return next()
+    if (err && !err.notFound) return next(err)
+    if (!doc) return next()
     ctx.value = doc.value
     ctx.tx.del(ctx.key)
     // todo: delete all tokens that contains key
@@ -79,11 +76,12 @@ function index (ctx, next) {
   var fields = ctx.options.fields
   if (typeof ctx.value === 'string') {
     // string value: tokenize with score 1
-  }
-  for (field in ctx.value) {
-    var score = Number(fields[field] || fields['*'])
-    if (!!score) {
-      // todo: index field
+  } else {
+    for (var field in ctx.value) {
+      var score = Number(fields[field] || fields['*'])
+      if (score) {
+        // todo: index field
+      }
     }
   }
 }
@@ -97,16 +95,16 @@ L.define('put', params('key', 'value', 'options'), pre, clean, index, commit)
 L.define('index', params('key', 'options'), pre, clean, index, commit)
 
 L.define('tokenize', params('value'), function (ctx, done) {
-  if(ctx.tokens) done(new Error()) // todo: no tokenize pipeline error
+  if (ctx.tokens) done(new Error()) // todo: no tokenize pipeline error
   else done(null, ctx.tokens)
 })
 
-L.createSearchStream = 
+L.createSearchStream =
 L.searchStream = function (q, opts) {
   opts = xtend(this.options, opts)
 }
 
-L.createLiveStream = 
+L.createLiveStream =
 L.liveStream = function (q, opts) {
   opts = xtend(this.options, opts)
 }
