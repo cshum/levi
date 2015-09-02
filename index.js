@@ -1,14 +1,17 @@
 var levelup = require('levelup')
 var sublevel = require('sublevelup')
+var transaction = require('level-transactions')
 var ginga = require('ginga')
 var xtend = require('xtend')
-var transaction = require('level-transactions')
 var H = require('highland')
 var iterate = require('./iterate')
 var through = require('through2')
 
 var defaults = {
-  db: process.browser ? require('leveldown') : require('level-js')
+  db: process.browser ? require('leveldown') : require('level-js'),
+  fields: {
+    '*': true
+  }
 }
 var override = {
   keyEncoding: 'utf8',
@@ -64,16 +67,25 @@ function clean (ctx, next) {
     if(!value) return next()
     ctx.value = doc.value
     ctx.tx.del(ctx.key)
-    ctx.tokens = doc.tokens
-    // todo delete all tokens that contains key
+    // todo: delete all tokens that contains key
     doc.tokens.forEach(function (token) {
-      self.tokens.del(token + '!' + ctx.key)
+      ctx.tx.del(token + '!' + ctx.key, { prefix: self.tokens })
     })
     next()
   })
 }
 
 function index (ctx, next) {
+  var fields = ctx.options.fields
+  if (typeof ctx.value === 'string') {
+    // string value: tokenize with score 1
+  }
+  for (field in ctx.value) {
+    var score = Number(fields[field] || fields['*'])
+    if (!!score) {
+      // todo: index field
+    }
+  }
 }
 
 function commit (ctx, done) {
@@ -82,7 +94,7 @@ function commit (ctx, done) {
 
 L.define('del', params('key', 'options'), pre, clean, commit)
 L.define('put', params('key', 'value', 'options'), pre, clean, index, commit)
-L.define('rebuild', params('key', 'options'), pre, clean, index, commit)
+L.define('index', params('key', 'options'), pre, clean, index, commit)
 
 L.define('tokenize', params('value'), function (ctx, done) {
   if(ctx.tokens) done(new Error()) // todo: no tokenize pipeline error
