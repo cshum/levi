@@ -84,9 +84,11 @@ function pre (ctx, next) {
     if (err) ctx.tx.rollback(err)
   })
 
-  if (ctx.key === null || ctx.key === undefined) {
-    return next(new Error('Key required.'))
-  }
+  if (
+    ctx.key === '' ||
+    ctx.key === null ||
+    ctx.key === undefined
+  ) return next(new Error('Key required.'))
   ctx.key = String(ctx.key)
   next()
 }
