@@ -203,13 +203,13 @@ Levi.fn.searchStream = function (q, opts) {
   .series()
   .flatten()
   .map(function (token) {
-    H(self.tf.createReadStream({
+    return H(self.tf.createReadStream({
       gt: token + '!',
       lt: token + '!' + END
     }))
-    .map()
-    // todo: union and idf stuff
   })
+  .reduce1() // todo union and idf
+  .series()
   .sortBy(function (a, b) {
     return b.score - a.score
   })
