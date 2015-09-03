@@ -191,7 +191,7 @@ Levi.fn.searchStream = function (q, opts) {
   opts = xtend(this.options, opts)
   var self = this
   var limit = Number(opts.limit) > 0 ? opts.limit : Infinity
-  var values = !!opts.values
+  var values = opts.values !== false
   H([].concat(q))
   .map(H.wrapCallback(function (q, cb) {
     // tokenize query
