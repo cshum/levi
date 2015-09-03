@@ -77,12 +77,18 @@ Levi.fn.define('pipeline', params('value'), function (ctx) {
 // stemmer
 // stopwords filtering
 
-function pre (ctx) {
+function pre (ctx, next) {
   ctx.options = xtend(this.options, ctx.options)
   ctx.tx = transaction(this.store)
-  ctx.on('end', function () {
-    ctx.tx.rollback()
+  ctx.on('end', function (err) {
+    if (err) ctx.tx.rollback(err)
   })
+
+  if (ctx.key === null || ctx.key === undefined) {
+    return next(new Error('Key required.'))
+  }
+  ctx.key = String(ctx.key)
+  next()
 }
 
 function clean (ctx, next) {
@@ -90,7 +96,7 @@ function clean (ctx, next) {
   ctx.tx.get(ctx.key, function (err, value) {
     if (err && !err.notFound) return next(err)
     if (!value) return next()
-    ctx.value = value
+    if (!ctx.value) ctx.value = value
     ctx.tx.del(ctx.key)
     // delete all tfs that contains key
     ctx.tx.get(ctx.key, { prefix: self.tokens }, function (err, tokens) {
@@ -105,6 +111,7 @@ function clean (ctx, next) {
 
 function index (ctx, next) {
   var self = this
+  if (!ctx.value) return next(new Error('Value required.'))
   if (typeof ctx.value === 'string') {
     // string value pipeline no fields
     this.pipeline(ctx.value, function (err, result) {
@@ -165,13 +172,13 @@ function index (ctx, next) {
   }
 }
 
-function commit (ctx, done) {
+function write (ctx, done) {
   ctx.tx.commit(done)
 }
 
-Levi.fn.define('del', params('key', 'options'), pre, clean, commit)
-Levi.fn.define('put', params('key', 'value', 'options'), pre, clean, index, commit)
-Levi.fn.define('index', params('key', 'options'), pre, clean, index, commit)
+Levi.fn.define('del', params('key', 'options'), pre, clean, write)
+Levi.fn.define('put', params('key', 'value', 'options'), pre, clean, index, write)
+Levi.fn.define('index', params('key', 'options'), pre, clean, index, write)
 
 Levi.fn.define('rebuildIndex', function (ctx, done) {
   // todo stream through store and .index(key)
