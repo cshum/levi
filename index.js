@@ -4,10 +4,10 @@ var transaction = require('level-transactions')
 var ginga = require('ginga')
 var xtend = require('xtend')
 var H = require('highland')
-var iterate = require('./iterate')
-var through = require('through2')
+// var iterate = require('./iterate')
+// var through = require('through2')
+var inherits = require('util').inherits
 var EventEmitter = require('events').EventEmitter
-var inherits = require('util').inherits 
 
 var defaults = {
   db: process.browser ? require('leveldown') : require('level-js'),
@@ -27,10 +27,9 @@ function params () {
 }
 
 function Levi (dir, opts) {
-  if (!(this instanceof Levi)) {
-    return new Levi(dir, opts)
-  }
+  if (!(this instanceof Levi)) return new Levi(dir, opts)
   opts = xtend(defaults, opts, override)
+
   var db = typeof dir === 'string' ?
     sublevel(levelup(dir, opts)) :
     sublevel(dir, opts)
@@ -38,57 +37,127 @@ function Levi (dir, opts) {
   this.options = db.options
   this.store = db
   this.tokens = db.sublevel('tokens')
+  this.tf = db.sublevel('tf')
 
   EventEmitter.call(this)
   this.setMaxListeners(Infinity)
 
-  // token: token!key -> tf
+  // store: key -> value
+  // tokens: key -> tokens
+  // inverse index: token!key -> tf
 }
 
 inherits(Levi, EventEmitter)
-var L = ginga(Levi.prototype)
 
-L.define('get', params('key', 'options'), function (ctx, done) {
-  ctx.options = xtend(this.options, ctx.options)
-  this.store.get(ctx.key, function (err, doc) {
-    done(err, doc ? doc.value : null)
+Levi.fn = ginga(Levi.prototype)
+
+Levi.fn.define('get', params('key'), function (ctx, done) {
+  this.store.get(ctx.key, done)
+})
+
+Levi.fn.define('pipeline', params('value'), function (ctx) {
+  ctx.tokens = []
+}, function (ctx, done) {
+  var counts = {}
+  ctx.tokens.forEach(function (token) {
+    counts[token] = (counts[token] || 0) + 1
+  })
+  done(null, {
+    tokens: ctx.tokens,
+    counts: counts
   })
 })
+
+// todo pipeline plugins:
+// tokenizer
+// stemmer
+// stopwords filtering
 
 function pre (ctx) {
   ctx.options = xtend(this.options, ctx.options)
   ctx.tx = transaction(this.store)
-  ctx.on('end', function (err) {
-    if (err && !err.notFound) ctx.tx.rollback(err)
+  ctx.on('end', function () {
+    ctx.tx.rollback()
   })
 }
 
 function clean (ctx, next) {
   var self = this
-  ctx.tx.get(ctx.key, function (err, doc) {
+  ctx.tx.get(ctx.key, function (err, value) {
     if (err && !err.notFound) return next(err)
-    if (!doc) return next()
-    ctx.value = doc.value
+    if (!value) return next()
+    ctx.value = value
     ctx.tx.del(ctx.key)
-    // todo: delete all tokens that contains key
-    doc.tokens.forEach(function (token) {
-      ctx.tx.del(token + '!' + ctx.key, { prefix: self.tokens })
+    // delete all tfs that contains key
+    ctx.tx.get(ctx.key, { prefix: self.tokens }, function (err, tokens) {
+      if (err) return next(err)
+      tokens.forEach(function (token) {
+        ctx.tx.del(token + '!' + ctx.key, { prefix: self.tf })
+      })
+      next()
     })
-    next()
   })
 }
 
 function index (ctx, next) {
-  var fields = ctx.options.fields
+  var self = this
   if (typeof ctx.value === 'string') {
-    // string value: tokenize with score 1
-  } else {
-    for (var field in ctx.value) {
-      var score = Number(fields[field] || fields['*'])
-      if (score) {
-        // todo: index field
+    // string value pipeline no fields
+    this.pipeline(ctx.value, function (err, result) {
+      if (err) return next(err)
+      var total = result.tokens.length
+      var counts = result.counts
+      for (var token in counts) {
+        ctx.tx.put(
+          token + '!' + ctx.key,
+          counts[token] / total,
+          { prefix: self.tf }
+        )
       }
-    }
+      ctx.tx.put(
+        ctx.key,
+        Object.keys(counts),
+        { prefix: self.tokens }
+      )
+      next()
+    })
+  } else {
+    // field based pipeline
+    var fields = ctx.options.fields
+    var tfs = {}
+    H(Object.keys(ctx.value))
+    .map(function (field) {
+      return {
+        name: field,
+        value: ctx.value[field],
+        boost: Number(fields[field] || fields['*'])
+      }
+    })
+    .filter(function (field) {
+      return field.boost
+    })
+    .map(H.wrapCallback(function (field, cb) {
+      self.pipeline(field.value, function (err, result) {
+        if (err) return cb(err)
+        var total = result.tokens.length
+        var counts = result.counts
+        var boost = field.boost
+        for (var token in counts) {
+          tfs[token] = (tfs[token] || 0) + (counts[token] / total * boost)
+        }
+        cb(null, field.name)
+      })
+    }))
+    .series()
+    .collect()
+    .pull(function (err, fields) {
+      if (err) return next(err)
+      for (var token in tfs) {
+        ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.tf })
+      }
+      ctx.tx.put(ctx.key, Object.keys(tfs), { prefix: self.tokens })
+      next()
+    })
   }
 }
 
@@ -96,22 +165,21 @@ function commit (ctx, done) {
   ctx.tx.commit(done)
 }
 
-L.define('del', params('key', 'options'), pre, clean, commit)
-L.define('put', params('key', 'value', 'options'), pre, clean, index, commit)
-L.define('index', params('key', 'options'), pre, clean, index, commit)
+Levi.fn.define('del', params('key', 'options'), pre, clean, commit)
+Levi.fn.define('put', params('key', 'value', 'options'), pre, clean, index, commit)
+Levi.fn.define('index', params('key', 'options'), pre, clean, index, commit)
 
-L.define('tokenize', params('value'), function (ctx, done) {
-  if (ctx.tokens) done(new Error()) // todo: no tokenize pipeline error
-  else done(null, ctx.tokens)
+Levi.fn.define('rebuildIndex', function (ctx, done) {
+  // todo stream through store and .index(key)
 })
 
-L.createSearchStream =
-L.searchStream = function (q, opts) {
+Levi.fn.createSearchStream =
+Levi.fn.searchStream = function (q, opts) {
   opts = xtend(this.options, opts)
 }
 
-L.createLiveStream =
-L.liveStream = function (q, opts) {
+Levi.fn.createLiveStream =
+Levi.fn.liveStream = function (q, opts) {
   opts = xtend(this.options, opts)
 }
 
