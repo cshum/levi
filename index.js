@@ -9,6 +9,8 @@ var H = require('highland')
 var inherits = require('util').inherits
 var EventEmitter = require('events').EventEmitter
 
+var END = '\uffff'
+
 var defaults = {
   db: process.browser ? require('leveldown') : require('level-js'),
   fields: { '*': true }
@@ -18,10 +20,12 @@ var override = {
   valueEncoding: 'json'
 }
 
+// simpler ginga params middleware
 function params () {
   var names = Array.prototype.slice.call(arguments)
-  var l = names.length
+  var len = names.length
   return function (ctx) {
+    var l = Math.min(ctx.args.length, len)
     for (var i = 0; i < l; i++) ctx[names[i]] = ctx.args[i]
   }
 }
@@ -176,6 +180,42 @@ Levi.fn.define('rebuildIndex', function (ctx, done) {
 Levi.fn.createSearchStream =
 Levi.fn.searchStream = function (q, opts) {
   opts = xtend(this.options, opts)
+  var self = this
+  var limit = Number(opts.limit) > 0 ? opts.limit : Infinity
+  var values = !!opts.values
+  H([].concat(q))
+  .map(H.wrapCallback(function (q, cb) {
+    // tokenize query
+    self.pipeline(q, function (err, result) {
+      if (err) return cb(err)
+      cb(null, result.tokens)
+    })
+  }))
+  .series()
+  .flatten()
+  .map(function (token) {
+    H(self.tf.createReadStream({
+      gt: token + '!',
+      lt: token + '!' + END
+    }))
+    .map()
+    // todo: union and idf stuff
+  })
+  .sortBy(function (a, b) {
+    return b.score - a.score
+  })
+  .map(H.wrapCallback(function (doc, cb) {
+    if (values) {
+      self.get(doc.key, function (err, val) {
+        if (err) return cb(err)
+        doc.value = val
+        cb(null, doc)
+      })
+    } else {
+      cb(null, doc)
+    }
+  }))
+  .take(limit)
 }
 
 Levi.fn.createLiveStream =
