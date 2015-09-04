@@ -52,7 +52,8 @@ function Levi (dir, opts) {
   // tokens: key -> tokens
   // term frequency: token!key -> tf
   this.store = db
-  this.tokens = db.sublevel('tk')
+  this.meta = db.sublevel('meta')
+  this.tokens = db.sublevel('tokens')
   this.tf = db.sublevel('tf')
 
   EventEmitter.call(this)
@@ -101,9 +102,16 @@ function clean (ctx, next) {
   var self = this
   ctx.tx.get(ctx.key, function (err, value) {
     if (err && !err.notFound) return next(err)
+    // skip if not exists
     if (!value) return next()
     if (!ctx.value) ctx.value = value
+    // del store item
     ctx.tx.del(ctx.key)
+    // decrement size
+    ctx.tx.get('size', { prefix: self.meta }, function (err, size) {
+      // size must be gt 0 here
+      ctx.tx.put('size', size - 1, { prefix: self.meta })
+    })
     // delete all tfs that contains key
     ctx.tx.get(ctx.key, { prefix: self.tokens }, function (err, tokens) {
       if (err) return next(err)
@@ -120,6 +128,11 @@ function index (ctx, next) {
   var self = this
   if (!ctx.value) return next(new Error('Value required.'))
 
+  // increment size
+  ctx.tx.get('size', { prefix: self.meta }, function (err, size) {
+    ctx.tx.put('size', (size || 0) + 1, { prefix: self.meta })
+  })
+  // put store item
   ctx.tx.put(ctx.key, ctx.value)
 
   if (typeof ctx.value === 'string') {
@@ -129,12 +142,14 @@ function index (ctx, next) {
       var total = tokens.length
       var counts = countTokens(tokens)
       for (var token in counts) {
+        // put tfs
         ctx.tx.put(
           token + '!' + ctx.key,
           counts[token] / total,
           { prefix: self.tf }
         )
       }
+      // put tokens
       ctx.tx.put(
         ctx.key,
         Object.keys(counts),
@@ -174,8 +189,10 @@ function index (ctx, next) {
     .pull(function (err, fields) {
       if (err) return next(err)
       for (var token in tfs) {
+        // put tfs
         ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.tf })
       }
+      // put tokens
       ctx.tx.put(ctx.key, Object.keys(tfs), { prefix: self.tokens })
       next()
     })

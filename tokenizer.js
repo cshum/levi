@@ -6,8 +6,7 @@ var SEP = /[\|' \.,\-|(\n)]+/
 module.exports = function tokenizer (sep) {
   sep = sep || SEP
 
-  return ginga()
-  .use('pipeline', function (ctx) {
+  return ginga().use('pipeline', function (ctx) {
     // tokenizer
     if (Array.isArray(ctx.value)) {
       ctx.tokens = H(ctx.value.slice)

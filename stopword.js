@@ -24,8 +24,7 @@ module.exports = function stopword (words) {
     map[word] = true
   })
 
-  return ginga()
-  .use('pipeline', function (ctx) {
+  return ginga().use('pipeline', function (ctx) {
     // english stopword filter
     ctx.tokens = H(ctx.tokens).reject(function (token) {
       return !!map[token]
