@@ -47,16 +47,16 @@ function Levi (dir, opts) {
     sublevel(dir, opts)
 
   this.options = db.options
+
+  // store: key -> value
+  // tokens: key -> tokens
+  // term frequency: token!key -> tf
   this.store = db
   this.tokens = db.sublevel('tk')
   this.tf = db.sublevel('tf')
 
   EventEmitter.call(this)
   this.setMaxListeners(Infinity)
-
-  // store: key -> value
-  // tokens: key -> tokens
-  // inverse index: token!key -> tf
 }
 
 // Pipeline plugins
@@ -199,6 +199,7 @@ Levi.fn.createSearchStream =
 Levi.fn.searchStream = function (q, opts) {
   opts = xtend(this.options, opts)
   var self = this
+  var offset = Number(opts.offset) > 0 ? opts.offset : 0
   var limit = Number(opts.limit) > 0 ? opts.limit : Infinity
   var values = opts.values !== false
 
@@ -220,6 +221,8 @@ Levi.fn.searchStream = function (q, opts) {
   .sortBy(function (a, b) {
     return b.score - a.score
   })
+  .drop(offset)
+  .take(limit)
   .map(H.wrapCallback(function (doc, cb) {
     if (values) {
       self.get(doc.key, function (err, val) {
@@ -231,7 +234,6 @@ Levi.fn.searchStream = function (q, opts) {
       cb(null, doc)
     }
   }))
-  .take(limit)
 }
 
 Levi.fn.createLiveStream =
