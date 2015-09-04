@@ -13,7 +13,7 @@ var lv = levi('./test/db', { db: down })
 
 test('CRUD', function (t) {
   lv.put('a', {
-    a: 'hello',
+    a: 'hello world',
     b: 'the world sucks'
   }, {
     fields: {a: 2, b: 1} 

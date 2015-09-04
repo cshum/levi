@@ -52,6 +52,7 @@ function Levi (dir, opts) {
   // tokens: key -> tokens
   // tfidf: token -> idf
   // tfidf: token!key -> tf
+
   this.store = db
   this.meta = db.sublevel('meta')
   this.tokens = db.sublevel('tokens')
@@ -60,6 +61,8 @@ function Levi (dir, opts) {
   EventEmitter.call(this)
   this.setMaxListeners(Infinity)
 }
+
+// todo: calculate idf
 
 // Pipeline plugins
 Levi.tokenizer = require('./tokenizer')
