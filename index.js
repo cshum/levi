@@ -78,6 +78,7 @@ Levi.fn.define('pipeline', params('value'), function (ctx, done) {
   H(ctx.tokens).collect().pull(done)
 })
 
+// preparation on put or del index
 function pre (ctx, next) {
   ctx.options = xtend(this.options, ctx.options)
   ctx.tx = transaction(this.store)
@@ -95,6 +96,7 @@ function pre (ctx, next) {
   next()
 }
 
+// clean up old index
 function clean (ctx, next) {
   var self = this
   ctx.tx.get(ctx.key, function (err, value) {
@@ -113,6 +115,7 @@ function clean (ctx, next) {
   })
 }
 
+// put new index
 function index (ctx, next) {
   var self = this
   if (!ctx.value) return next(new Error('Value required.'))
@@ -179,6 +182,7 @@ function index (ctx, next) {
   }
 }
 
+// commit index write 
 function write (ctx, done) {
   ctx.tx.commit(done)
 }
