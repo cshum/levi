@@ -48,10 +48,12 @@ function Levi (dir, opts) {
 
   this.options = db.options
 
+  // meta: size -> N
   // store: key -> value
   // tokens: key -> tokens
-  // tfidf: token -> idf
+  // tfidf: token! -> nt
   // tfidf: token!key -> tf
+  // To calculate: idf = log(1 + N/nt)
 
   this.store = db
   this.meta = db.sublevel('meta')
@@ -121,6 +123,11 @@ function del (ctx, next) {
     ctx.tx.get(ctx.key, { prefix: self.tokens }, function (err, tokens) {
       if (err) return next(err)
       tokens.forEach(function (token) {
+        // decrement nt
+        ctx.tx.get(token + '!', { prefix: self.tfidf }, function (err, nt) {
+          ctx.tx.put(token + '!', nt - 1, { prefix: self.tfidf })
+        })
+        // del tf
         ctx.tx.del(token + '!' + ctx.key, { prefix: self.tfidf })
       })
       next()
@@ -146,20 +153,17 @@ function put (ctx, next) {
       if (err) return next(err)
       var total = tokens.length
       var counts = countTokens(tokens)
-      for (var token in counts) {
-        // put tfs
-        ctx.tx.put(
-          token + '!' + ctx.key,
-          counts[token] / total,
-          { prefix: self.tfidf }
-        )
-      }
+      var uniqs = Object.keys(counts)
+      uniqs.forEach(function (token) {
+        // increment nt
+        ctx.tx.get(token + '!', { prefix: self.tfidf }, function (err, nt) {
+          ctx.tx.put(token + '!', (nt || 0) + 1, { prefix: self.tfidf })
+        })
+        // put tf
+        ctx.tx.put(token + '!' + ctx.key, counts[token] / total, { prefix: self.tfidf })
+      })
       // put tokens
-      ctx.tx.put(
-        ctx.key,
-        Object.keys(counts),
-        { prefix: self.tokens }
-      )
+      ctx.tx.put(ctx.key, uniqs, { prefix: self.tokens })
       next()
     })
   } else {
@@ -193,12 +197,17 @@ function put (ctx, next) {
     .collect()
     .pull(function (err, fields) {
       if (err) return next(err)
-      for (var token in tfs) {
-        // put tfs
+      var uniqs = Object.keys(tfs)
+      uniqs.forEach(function (token) {
+        // increment nt
+        ctx.tx.get(token + '!', { prefix: self.tfidf }, function (err, nt) {
+          ctx.tx.put(token + '!', (nt || 0) + 1, { prefix: self.tfidf })
+        })
+        // put tf
         ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.tfidf })
-      }
+      })
       // put tokens
-      ctx.tx.put(ctx.key, Object.keys(tfs), { prefix: self.tokens })
+      ctx.tx.put(ctx.key, uniqs, { prefix: self.tokens })
       next()
     })
   }
@@ -234,7 +243,7 @@ Levi.fn.searchStream = function (q, opts) {
   })
   .map(function (token) {
     return H(self.tfidf.createReadStream({
-      gt: token + '!',
+      gte: token + '!',
       lt: token + '!' + END
     }))
   })

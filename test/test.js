@@ -22,3 +22,12 @@ test('CRUD', function (t) {
     t.end()
   })
 })
+test('CRUD2', function (t) {
+  lv.put(
+    'b', 
+   'Lorem Ipsum sucks text of the printing and typesetting industry.',
+   function (err) {
+    t.notOk(err)
+    t.end()
+  })
+})
