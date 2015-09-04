@@ -20,7 +20,7 @@ var override = {
   valueEncoding: 'json'
 }
 
-// simpler ginga params middleware
+// ginga params middleware
 function params () {
   var names = Array.prototype.slice.call(arguments)
   var len = names.length
@@ -63,14 +63,19 @@ inherits(Levi, EventEmitter)
 
 Levi.fn = ginga(Levi.prototype)
 
+Levi.tokenizer = require('./tokenizer')
+Levi.stemmer = require('./stemmer')
+Levi.stopword = require('./stopword')
+
 Levi.fn.define('get', params('key'), function (ctx, done) {
   this.store.get(ctx.key, done)
 })
 
-Levi.fn.define('pipeline', params('value'), function (ctx) {
-  ctx.tokens = []
-}, function (ctx, done) {
-  done(null, ctx.tokens)
+Levi.fn.define('pipeline', params('value'), function (ctx, done) {
+  if (!ctx.tokens) {
+    return done(new Error('Missing tokenization pipeline.'))
+  }
+  H(ctx.tokens).collect().pull(done)
 })
 
 // todo pipeline plugins:
@@ -91,6 +96,7 @@ function pre (ctx, next) {
     ctx.key === undefined
   ) return next(new Error('Key required.'))
   ctx.key = String(ctx.key)
+
   next()
 }
 
@@ -193,16 +199,14 @@ Levi.fn.searchStream = function (q, opts) {
   var self = this
   var limit = Number(opts.limit) > 0 ? opts.limit : Infinity
   var values = opts.values !== false
-  H([].concat(q))
-  .map(H.wrapCallback(function (q, cb) {
-    // tokenize query
+
+  H(function (push, next) {
+    // pipeline query
     self.pipeline(q, function (err, tokens) {
-      if (err) return cb(err)
-      cb(null, tokens)
+      if (err) return push(err)
+      next(H(tokens))
     })
-  }))
-  .series()
-  .flatten()
+  })
   .map(function (token) {
     return H(self.tf.createReadStream({
       gt: token + '!',
