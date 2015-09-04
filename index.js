@@ -48,7 +48,7 @@ function Levi (dir, opts) {
 
   this.options = db.options
   this.store = db
-  this.tokens = db.sublevel('tokens')
+  this.tokens = db.sublevel('tk')
   this.tf = db.sublevel('tf')
 
   EventEmitter.call(this)
@@ -59,13 +59,13 @@ function Levi (dir, opts) {
   // inverse index: token!key -> tf
 }
 
-inherits(Levi, EventEmitter)
-
-Levi.fn = ginga(Levi.prototype)
-
+// Pipeline plugins
 Levi.tokenizer = require('./tokenizer')
 Levi.stemmer = require('./stemmer')
 Levi.stopword = require('./stopword')
+
+inherits(Levi, EventEmitter)
+Levi.fn = ginga(Levi.prototype)
 
 Levi.fn.define('get', params('key'), function (ctx, done) {
   this.store.get(ctx.key, done)
@@ -77,11 +77,6 @@ Levi.fn.define('pipeline', params('value'), function (ctx, done) {
   }
   H(ctx.tokens).collect().pull(done)
 })
-
-// todo pipeline plugins:
-// tokenizer
-// stemmer
-// stopwords filtering
 
 function pre (ctx, next) {
   ctx.options = xtend(this.options, ctx.options)
@@ -121,12 +116,15 @@ function clean (ctx, next) {
 function index (ctx, next) {
   var self = this
   if (!ctx.value) return next(new Error('Value required.'))
+
+  ctx.tx.put(ctx.key, ctx.value)
+
   if (typeof ctx.value === 'string') {
     // string value pipeline no fields
     this.pipeline(ctx.value, function (err, tokens) {
       if (err) return next(err)
       var total = tokens.length
-      var counts = countTokens(counts)
+      var counts = countTokens(tokens)
       for (var token in counts) {
         ctx.tx.put(
           token + '!' + ctx.key,
@@ -160,7 +158,7 @@ function index (ctx, next) {
       self.pipeline(field.value, function (err, tokens) {
         if (err) return cb(err)
         var total = tokens.length
-        var counts = countTokens(counts)
+        var counts = countTokens(tokens)
         var boost = field.boost
         for (var token in counts) {
           tfs[token] = (tfs[token] || 0) + (counts[token] / total * boost)

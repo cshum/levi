@@ -1,11 +1,7 @@
 var ginga = require('ginga')
 var H = require('highland')
-var stemmer = require('porter-stemmer').stemmer
 
-//english stopword filter
-
-var map = {}
-[
+var en = [
   'about', 'after', 'all', 'also', 'am', 'an', 'and', 'another', 'any', 'are', 'as', 'at', 'be',
   'because', 'been', 'before', 'being', 'between', 'both', 'but', 'by', 'came', 'can',
   'come', 'could', 'did', 'do', 'each', 'for', 'from', 'get', 'got', 'has', 'had',
@@ -19,13 +15,20 @@ var map = {}
   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
   'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '$', '1',
   '2', '3', '4', '5', '6', '7', '8', '9', '0', '_'
-].forEach(function (word) {
-  map[word] = true
-})
+]
 
-ginga(module.exports).use('pipeline', function (ctx) {
-  ctx.tokens = H(ctx.tokens).reject(function (token) {
-    return map[token]
+module.exports = function stopword (words) {
+  var map = {}
+  words = words || en
+  words.forEach(function (word) {
+    map[word] = true
   })
-})
 
+  return ginga()
+  .use('pipeline', function (ctx) {
+    // english stopword filter
+    ctx.tokens = H(ctx.tokens).reject(function (token) {
+      return !!map[token]
+    })
+  })
+}
