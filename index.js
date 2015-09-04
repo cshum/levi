@@ -30,6 +30,14 @@ function params () {
   }
 }
 
+function countTokens (tokens) {
+  var counts = {}
+  tokens.forEach(function (token) {
+    counts[token] = (counts[token] || 0) + 1
+  })
+  return counts
+}
+
 function Levi (dir, opts) {
   if (!(this instanceof Levi)) return new Levi(dir, opts)
   opts = xtend(defaults, opts, override)
@@ -62,14 +70,7 @@ Levi.fn.define('get', params('key'), function (ctx, done) {
 Levi.fn.define('pipeline', params('value'), function (ctx) {
   ctx.tokens = []
 }, function (ctx, done) {
-  var counts = {}
-  ctx.tokens.forEach(function (token) {
-    counts[token] = (counts[token] || 0) + 1
-  })
-  done(null, {
-    tokens: ctx.tokens,
-    counts: counts
-  })
+  done(null, ctx.tokens)
 })
 
 // todo pipeline plugins:
@@ -116,10 +117,10 @@ function index (ctx, next) {
   if (!ctx.value) return next(new Error('Value required.'))
   if (typeof ctx.value === 'string') {
     // string value pipeline no fields
-    this.pipeline(ctx.value, function (err, result) {
+    this.pipeline(ctx.value, function (err, tokens) {
       if (err) return next(err)
-      var total = result.tokens.length
-      var counts = result.counts
+      var total = tokens.length
+      var counts = countTokens(counts)
       for (var token in counts) {
         ctx.tx.put(
           token + '!' + ctx.key,
@@ -150,10 +151,10 @@ function index (ctx, next) {
       return field.boost
     })
     .map(H.wrapCallback(function (field, cb) {
-      self.pipeline(field.value, function (err, result) {
+      self.pipeline(field.value, function (err, tokens) {
         if (err) return cb(err)
-        var total = result.tokens.length
-        var counts = result.counts
+        var total = tokens.length
+        var counts = countTokens(counts)
         var boost = field.boost
         for (var token in counts) {
           tfs[token] = (tfs[token] || 0) + (counts[token] / total * boost)
@@ -195,9 +196,9 @@ Levi.fn.searchStream = function (q, opts) {
   H([].concat(q))
   .map(H.wrapCallback(function (q, cb) {
     // tokenize query
-    self.pipeline(q, function (err, result) {
+    self.pipeline(q, function (err, tokens) {
       if (err) return cb(err)
-      cb(null, result.tokens)
+      cb(null, tokens)
     })
   }))
   .series()
