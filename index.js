@@ -50,11 +50,12 @@ function Levi (dir, opts) {
 
   // store: key -> value
   // tokens: key -> tokens
-  // term frequency: token!key -> tf
+  // tfidf: token -> idf
+  // tfidf: token!key -> tf
   this.store = db
   this.meta = db.sublevel('meta')
   this.tokens = db.sublevel('tokens')
-  this.tf = db.sublevel('tf')
+  this.tfidf = db.sublevel('tfidf')
 
   EventEmitter.call(this)
   this.setMaxListeners(Infinity)
@@ -79,7 +80,7 @@ Levi.fn.define('pipeline', params('value'), function (ctx, done) {
   H(ctx.tokens).collect().pull(done)
 })
 
-// preparation on put or del index
+// prepare transaction and checks
 function pre (ctx, next) {
   ctx.options = xtend(this.options, ctx.options)
   ctx.tx = transaction(this.store)
@@ -98,12 +99,13 @@ function pre (ctx, next) {
 }
 
 // clean up old index
-function clean (ctx, next) {
+function del (ctx, next) {
   var self = this
   ctx.tx.get(ctx.key, function (err, value) {
     if (err && !err.notFound) return next(err)
     // skip if not exists
     if (!value) return next()
+    // keep value if reindexing
     if (!ctx.value) ctx.value = value
     // del store item
     ctx.tx.del(ctx.key)
@@ -116,7 +118,7 @@ function clean (ctx, next) {
     ctx.tx.get(ctx.key, { prefix: self.tokens }, function (err, tokens) {
       if (err) return next(err)
       tokens.forEach(function (token) {
-        ctx.tx.del(token + '!' + ctx.key, { prefix: self.tf })
+        ctx.tx.del(token + '!' + ctx.key, { prefix: self.tfidf })
       })
       next()
     })
@@ -124,7 +126,7 @@ function clean (ctx, next) {
 }
 
 // put new index
-function index (ctx, next) {
+function put (ctx, next) {
   var self = this
   if (!ctx.value) return next(new Error('Value required.'))
 
@@ -146,7 +148,7 @@ function index (ctx, next) {
         ctx.tx.put(
           token + '!' + ctx.key,
           counts[token] / total,
-          { prefix: self.tf }
+          { prefix: self.tfidf }
         )
       }
       // put tokens
@@ -190,7 +192,7 @@ function index (ctx, next) {
       if (err) return next(err)
       for (var token in tfs) {
         // put tfs
-        ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.tf })
+        ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.tfidf })
       }
       // put tokens
       ctx.tx.put(ctx.key, Object.keys(tfs), { prefix: self.tokens })
@@ -204,9 +206,9 @@ function write (ctx, done) {
   ctx.tx.commit(done)
 }
 
-Levi.fn.define('del', params('key', 'options'), pre, clean, write)
-Levi.fn.define('put', params('key', 'value', 'options'), pre, clean, index, write)
-Levi.fn.define('index', params('key', 'options'), pre, clean, index, write)
+Levi.fn.define('del', params('key', 'options'), pre, del, write)
+Levi.fn.define('put', params('key', 'value', 'options'), pre, del, put, write)
+Levi.fn.define('index', params('key', 'options'), pre, del, put, write)
 
 Levi.fn.define('rebuildIndex', function (ctx, done) {
   // todo stream through store and .index(key)
@@ -228,7 +230,7 @@ Levi.fn.searchStream = function (q, opts) {
     })
   })
   .map(function (token) {
-    return H(self.tf.createReadStream({
+    return H(self.tfidf.createReadStream({
       gt: token + '!',
       lt: token + '!' + END
     }))
