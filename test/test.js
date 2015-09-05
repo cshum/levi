@@ -28,3 +28,9 @@ test('CRUD', function (t) {
     t.end()
   })
 })
+
+test('Search', function (t) {
+  lv.searchStream('hello sucks').each(function (data) {
+    console.log(data)
+  })
+})

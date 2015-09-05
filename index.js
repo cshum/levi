@@ -233,23 +233,51 @@ Levi.fn.createSearchStream =
 Levi.fn.searchStream = function (q, opts) {
   opts = xtend(this.options, opts)
   var self = this
+  /*
   var offset = Number(opts.offset) > 0 ? opts.offset : 0
   var limit = Number(opts.limit) > 0 ? opts.limit : Infinity
   var values = opts.values !== false
+  */
 
-  H(function (push, next) {
+  var N
+  return H(function (push, next) {
     // pipeline query
     self.pipeline(q, function (err, tokens) {
       if (err) return push(err)
-      next(H(tokens))
+      self.meta.get('size', function (err, size) {
+        if (err && !err.notFound) return push(err)
+        if (!size) return next(H([]))
+        N = size
+        next(H(tokens))
+      })
     })
   })
   .map(function (token) {
+    var idf
+    var len = token.length + 1 // token! length
     return H(self.tfidf.createReadStream({
       gte: token + '!',
       lt: token + '!' + END
     }))
+    .map(function (data) {
+      if (idf === undefined) {
+        var nt = data.value
+        idf = Math.log(1 + N / nt)
+      } else {
+        var tf = data.value
+        return {
+          token: token,
+          key: data.key.slice(len),
+          tfidf: tf * idf
+        }
+      }
+    })
+    .filter(function (data) {
+      return !!data
+    })
   })
+  .series()
+  /*
   .reduce1() // todo union and idf
   .series()
   .sortBy(function (a, b) {
@@ -268,6 +296,7 @@ Levi.fn.searchStream = function (q, opts) {
       cb(null, doc)
     }
   }))
+  */
 }
 
 Levi.fn.createLiveStream =
