@@ -4,10 +4,9 @@ var transaction = require('level-transactions')
 var ginga = require('ginga')
 var xtend = require('xtend')
 var H = require('highland')
-// var iterate = require('./iterate')
-// var through = require('through2')
 var inherits = require('util').inherits
 var EventEmitter = require('events').EventEmitter
+// var sort = require('./sort')
 
 var END = '\uffff'
 
@@ -51,14 +50,13 @@ function Levi (dir, opts) {
   // meta: size -> N
   // store: key -> value
   // tokens: key -> tokens
-  // tfidf: token! -> nt
-  // tfidf: token!key -> tf
-  // To calculate: idf = log(1 + N/nt)
+  // weight: token! -> nt
+  // weight: token!key -> raw tf
 
   this.store = db
-  this.meta = db.sublevel('meta')
-  this.tokens = db.sublevel('tokens')
-  this.tfidf = db.sublevel('tfidf')
+  this.meta = db.sublevel('mt')
+  this.tokens = db.sublevel('tk')
+  this.weight = db.sublevel('wt')
 
   EventEmitter.call(this)
   this.setMaxListeners(Infinity)
@@ -135,9 +133,9 @@ function del (ctx, next) {
       if (err) return next(err)
       tokens.forEach(function (token) {
         // decrement nt
-        ctx.tx.decr(token + '!', { prefix: self.tfidf })
+        ctx.tx.decr(token + '!', { prefix: self.weight })
         // del tf
-        ctx.tx.del(token + '!' + ctx.key, { prefix: self.tfidf })
+        ctx.tx.del(token + '!' + ctx.key, { prefix: self.weight })
       })
       next()
     })
@@ -163,9 +161,10 @@ function put (ctx, next) {
       var uniqs = Object.keys(counts)
       uniqs.forEach(function (token) {
         // increment nt
-        ctx.tx.incr(token + '!', { prefix: self.tfidf })
+        ctx.tx.incr(token + '!', { prefix: self.weight })
         // put tf
-        ctx.tx.put(token + '!' + ctx.key, counts[token] / total, { prefix: self.tfidf })
+        ctx.tx.put(token + '!' + ctx.key, counts[token] / total, {
+          prefix: self.weight })
       })
       // put tokens
       ctx.tx.put(ctx.key, uniqs, { prefix: self.tokens })
@@ -205,9 +204,9 @@ function put (ctx, next) {
       var uniqs = Object.keys(tfs)
       uniqs.forEach(function (token) {
         // increment nt
-        ctx.tx.incr(token + '!', { prefix: self.tfidf })
+        ctx.tx.incr(token + '!', { prefix: self.weight })
         // put tf
-        ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.tfidf })
+        ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.weight })
       })
       // put tokens
       ctx.tx.put(ctx.key, uniqs, { prefix: self.tokens })
@@ -223,11 +222,7 @@ function write (ctx, done) {
 
 Levi.fn.define('del', params('key', 'options'), pre, del, write)
 Levi.fn.define('put', params('key', 'value', 'options'), pre, del, put, write)
-Levi.fn.define('index', params('key', 'options'), pre, del, put, write)
-
-Levi.fn.define('rebuildIndex', function (ctx, done) {
-  // todo stream through store and .index(key)
-})
+Levi.fn.define('reindex', params('key', 'options'), pre, del, put, write)
 
 Levi.fn.createSearchStream =
 Levi.fn.searchStream = function (q, opts) {
@@ -238,12 +233,13 @@ Levi.fn.searchStream = function (q, opts) {
   var limit = Number(opts.limit) > 0 ? opts.limit : Infinity
   var values = opts.values !== false
   */
-
   var N
+
   return H(function (push, next) {
     // pipeline query
     self.pipeline(q, function (err, tokens) {
       if (err) return push(err)
+      // get N
       self.meta.get('size', function (err, size) {
         if (err && !err.notFound) return push(err)
         if (!size) return next(H([]))
@@ -255,15 +251,18 @@ Levi.fn.searchStream = function (q, opts) {
   .map(function (token) {
     var idf
     var len = token.length + 1 // token! length
-    return H(self.tfidf.createReadStream({
+
+    return H(self.weight.createReadStream({
       gte: token + '!',
       lt: token + '!' + END
     }))
     .map(function (data) {
       if (idf === undefined) {
+        // idf smooth = log(1 + N/nt)
         var nt = data.value
         idf = Math.log(1 + N / nt)
       } else {
+        // tfidf = tf * idf
         var tf = Math.log(1 + data.value)
         return {
           token: token,
@@ -276,7 +275,9 @@ Levi.fn.searchStream = function (q, opts) {
       return !!data
     })
   })
+  // .reduce1(sort)
   .series()
+  // todo score based on consine of vector space model
   /*
   .reduce1() // todo union and idf
   .series()

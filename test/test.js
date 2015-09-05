@@ -25,12 +25,18 @@ test('CRUD', function (t) {
    'Lorem Ipsum sucks text of the printing and typesetting industry.',
    function (err) {
     t.notOk(err)
+  })
+  lv.put(
+    'c',
+   'Aldus PageMaker including versions of Lorem Ipsum.',
+   function (err) {
+    t.notOk(err)
     t.end()
   })
 })
 
 test('Search', function (t) {
-  lv.searchStream('hello sucks').each(function (data) {
+  lv.searchStream('hello lorem sucks').each(function (data) {
     console.log(data)
   })
 })

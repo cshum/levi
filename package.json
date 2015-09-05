@@ -10,8 +10,8 @@
     "leveldown": "^1.4.1",
     "levelup": "^1.2.1",
     "porter-stemmer": "^0.9.1",
+    "stream-iterate": "^1.1.1",
     "sublevelup": "^3.1.0",
-    "through2": "^2.0.0",
     "xtend": "^4.0.0"
   },
   "devDependencies": {
