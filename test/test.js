@@ -19,10 +19,7 @@ test('CRUD', function (t) {
     fields: {a: 2, b: 1}
   }, function (err) {
     t.notOk(err)
-    t.end()
   })
-})
-test('CRUD2', function (t) {
   lv.put(
     'b',
    'Lorem Ipsum sucks text of the printing and typesetting industry.',
