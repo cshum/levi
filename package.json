@@ -1,7 +1,8 @@
 {
   "name": "levi",
   "version": "0.0.1",
-  "description": "",
+  "description": "Streaming text search for Node.js and browser",
+  "author": "Adrian C Shum <adrian@cshum.com> (https://github.com/cshum)",
   "dependencies": {
     "ginga": "^1.1.1",
     "highland": "^2.5.1",
@@ -15,8 +16,14 @@
     "xtend": "^4.0.0"
   },
   "devDependencies": {
+    "beefy": "^2.1.5",
+    "browserify": "^10.2.6",
+    "bundle-collapser": "^1.2.0",
     "jsondown": "^0.1.1",
+    "derequire": "^2.0.0",
+    "indexeddbshim": "^2.0.1",
     "rimraf": "^2.4.2",
+    "uglify-js": "^2.4.23",
     "standard": "^5.1.0",
     "tape": "^4.1.0"
   },
@@ -24,16 +31,13 @@
     "type": "git",
     "url": "https://github.com/cshum/levi.git"
   },
-  "author": "Adrian C Shum",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cshum/levi/issues"
-  },
   "homepage": "https://github.com/cshum/levi",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
-    "test": "standard && node test/test.js"
+    "test": "standard && node test/test.js",
+    "test-browser": "beefy test/test.js:test.js",
+    "build": "rm -rf dist; mkdir dist; npm run browserify; npm run min;",
+    "browserify": "browserify . -s levi -p bundle-collapser/plugin | derequire > dist/levi.js",
+    "min": "uglifyjs dist/levi.js -mc > dist/levi.min.js"
   }
 }
