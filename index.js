@@ -8,6 +8,7 @@ var inherits = require('util').inherits
 var EventEmitter = require('events').EventEmitter
 var sort = require('./sort')
 var group = require('./group')
+var similar = require('./similar')
 
 var END = '\uffff'
 
@@ -229,11 +230,9 @@ Levi.fn.createSearchStream =
 Levi.fn.searchStream = function (q, opts) {
   opts = xtend(this.options, opts)
   var self = this
-  /*
   var offset = Number(opts.offset) > 0 ? opts.offset : 0
   var limit = Number(opts.limit) > 0 ? opts.limit : Infinity
   var values = opts.values !== false
-  */
   var N
   var query = {}
 
@@ -297,11 +296,9 @@ Levi.fn.searchStream = function (q, opts) {
     })
     return {
       key: data[0].key,
-      vector: vector
+      score: similar(query, vector)
     }
   })
-  // todo score based on consine of vector space model
-  /*
   .sortBy(function (a, b) {
     return b.score - a.score
   })
@@ -318,7 +315,7 @@ Levi.fn.searchStream = function (q, opts) {
       cb(null, doc)
     }
   }))
-  */
+  .series()
 }
 
 Levi.fn.createLiveStream =
