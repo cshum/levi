@@ -7,6 +7,7 @@ var H = require('highland')
 var inherits = require('util').inherits
 var EventEmitter = require('events').EventEmitter
 var sort = require('./sort')
+var group = require('./group')
 
 var END = '\uffff'
 
@@ -275,12 +276,11 @@ Levi.fn.searchStream = function (q, opts) {
       return !!data
     })
   })
-  .reduce1(sort)
+  .reduce1(sort) // do merge sort since weight sorted by key
   .series()
+  .through(group)
   // todo score based on consine of vector space model
   /*
-  .reduce1() // todo union and idf
-  .series()
   .sortBy(function (a, b) {
     return b.score - a.score
   })

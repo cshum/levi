@@ -4,10 +4,6 @@ var iterate = require('stream-iterate')
 // merge sort taken from
 // https://github.com/mafintosh/stream-iterate/blob/master/test.js
 
-function toKey (val) {
-  return val.key
-}
-
 module.exports = function (streamA, streamB) {
   var readA = iterate(streamA)
   var readB = iterate(streamB)
@@ -20,8 +16,8 @@ module.exports = function (streamA, streamB) {
 
         if (!dataA && !dataB) return push(null, H.nil)
 
-        var keyA = dataA ? toKey(dataA) : undefined
-        var keyB = dataB ? toKey(dataB) : undefined
+        var keyA = dataA ? dataA.key : undefined
+        var keyB = dataB ? dataB.key : undefined
 
         if (!dataB || keyA < keyB) {
           push(null, dataA)
