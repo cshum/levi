@@ -64,8 +64,6 @@ function Levi (dir, opts) {
   this.setMaxListeners(Infinity)
 }
 
-// todo: calculate idf
-
 // Pipeline plugins
 Levi.tokenizer = require('./tokenizer')
 Levi.stemmer = require('./stemmer')
@@ -154,67 +152,55 @@ function put (ctx, next) {
   // put store item
   ctx.tx.put(ctx.key, ctx.value)
 
+  var value, fields
   if (typeof ctx.value === 'string') {
-    // string value pipeline no fields
-    this.pipeline(ctx.value, function (err, tokens) {
-      if (err) return next(err)
+    // string means no field boost
+    value = { text: ctx.value }
+    fields = { text: 1 }
+  } else {
+    value = ctx.value
+    fields = ctx.options.fields
+  }
+
+  var tfs = {}
+  H(Object.keys(value))
+  .map(function (field) {
+    return {
+      name: field,
+      value: value[field],
+      boost: Number(fields[field] || fields['*'])
+    }
+  })
+  .filter(function (field) {
+    return field.boost
+  })
+  .map(H.wrapCallback(function (field, cb) {
+    self.pipeline(field.value, function (err, tokens) {
+      if (err) return cb(err)
       var total = tokens.length
       var counts = countTokens(tokens)
-      var uniqs = Object.keys(counts)
-      uniqs.forEach(function (token) {
-        // increment nt
-        ctx.tx.incr(token + '!', { prefix: self.weight })
-        // put tf
-        ctx.tx.put(token + '!' + ctx.key, counts[token] / total, {
-          prefix: self.weight })
-      })
-      // put tokens
-      ctx.tx.put(ctx.key, uniqs, { prefix: self.tokens })
-      next()
-    })
-  } else {
-    // field based pipeline
-    var fields = ctx.options.fields
-    var tfs = {}
-    H(Object.keys(ctx.value))
-    .map(function (field) {
-      return {
-        name: field,
-        value: ctx.value[field],
-        boost: Number(fields[field] || fields['*'])
+      var boost = field.boost
+      for (var token in counts) {
+        tfs[token] = (tfs[token] || 0) + (counts[token] / total * boost)
       }
+      cb(null, field.name)
     })
-    .filter(function (field) {
-      return field.boost
+  }))
+  .series()
+  .collect()
+  .pull(function (err, fields) {
+    if (err) return next(err)
+    var uniqs = Object.keys(tfs)
+    uniqs.forEach(function (token) {
+      // increment nt
+      ctx.tx.incr(token + '!', { prefix: self.weight })
+      // put tf
+      ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.weight })
     })
-    .map(H.wrapCallback(function (field, cb) {
-      self.pipeline(field.value, function (err, tokens) {
-        if (err) return cb(err)
-        var total = tokens.length
-        var counts = countTokens(tokens)
-        var boost = field.boost
-        for (var token in counts) {
-          tfs[token] = (tfs[token] || 0) + (counts[token] / total * boost)
-        }
-        cb(null, field.name)
-      })
-    }))
-    .series()
-    .collect()
-    .pull(function (err, fields) {
-      if (err) return next(err)
-      var uniqs = Object.keys(tfs)
-      uniqs.forEach(function (token) {
-        // increment nt
-        ctx.tx.incr(token + '!', { prefix: self.weight })
-        // put tf
-        ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.weight })
-      })
-      // put tokens
-      ctx.tx.put(ctx.key, uniqs, { prefix: self.tokens })
-      next()
-    })
-  }
+    // put tokens
+    ctx.tx.put(ctx.key, uniqs, { prefix: self.tokens })
+    next()
+  })
 }
 
 // commit index write
@@ -286,7 +272,7 @@ Levi.fn.searchStream = function (q, opts) {
       return !!data
     })
   })
-  .reduce1(sort) // do merge sort since weight sorted by key
+  .reduce1(sort) // merge sort since weight sorted by key
   .series()
   .through(group)
   .map(function (data) {
@@ -300,6 +286,7 @@ Levi.fn.searchStream = function (q, opts) {
     }
   })
   .sortBy(function (a, b) {
+    // sort by score desc
     return b.score - a.score
   })
   .drop(offset)
