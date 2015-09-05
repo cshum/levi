@@ -127,6 +127,12 @@ function pre (ctx, next) {
 // clean up old index
 function del (ctx, next) {
   var self = this
+  if (!ctx.value) {
+    ctx.on('end', function (err) {
+      if (err) return
+      self.emit('del', { key: ctx.key })
+    })
+  }
   ctx.tx.get(ctx.key, function (err, value) {
     if (err && !err.notFound) return next(err)
     // skip if not exists
