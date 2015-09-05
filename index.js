@@ -85,14 +85,28 @@ Levi.fn.define('pipeline', params('value'), function (ctx, done) {
   H(ctx.tokens).collect().pull(done)
 })
 
-// prepare transaction and checks
 function pre (ctx, next) {
   ctx.options = xtend(this.options, ctx.options)
+
+  // prepare transaction
   ctx.tx = transaction(this.store)
+  ctx.tx.incr = function (key, options) {
+    this.get(key, options, function (err, val) {
+      if (err && !err.notFound) return next(err)
+      this.put(key, (val || 0) + 1, options)
+    })
+  }
+  ctx.tx.decr = function (key, options) {
+    this.get(key, options, function (err, val) {
+      if (err && !err.notFound) return next(err)
+      this.put(key, (val || 0) - 1, options)
+    })
+  }
   ctx.on('end', function (err) {
     if (err) ctx.tx.rollback(err)
   })
 
+  // key check
   if (
     ctx.key === '' ||
     ctx.key === null ||
@@ -115,20 +129,13 @@ function del (ctx, next) {
     // del store item
     ctx.tx.del(ctx.key)
     // decrement size
-    ctx.tx.get('size', { prefix: self.meta }, function (err, size) {
-      if (err && !err.notFound) return next(err)
-      // size must be gt 0 here
-      ctx.tx.put('size', size - 1, { prefix: self.meta })
-    })
+    ctx.tx.decr('size', { prefix: self.meta })
     // delete all tfs that contains key
     ctx.tx.get(ctx.key, { prefix: self.tokens }, function (err, tokens) {
       if (err) return next(err)
       tokens.forEach(function (token) {
         // decrement nt
-        ctx.tx.get(token + '!', { prefix: self.tfidf }, function (err, nt) {
-          if (err && !err.notFound) return next(err)
-          ctx.tx.put(token + '!', nt - 1, { prefix: self.tfidf })
-        })
+        ctx.tx.decr(token + '!', { prefix: self.tfidf })
         // del tf
         ctx.tx.del(token + '!' + ctx.key, { prefix: self.tfidf })
       })
@@ -143,10 +150,7 @@ function put (ctx, next) {
   if (!ctx.value) return next(new Error('Value required.'))
 
   // increment size
-  ctx.tx.get('size', { prefix: self.meta }, function (err, size) {
-    if (err && !err.notFound) return next(err)
-    ctx.tx.put('size', (size || 0) + 1, { prefix: self.meta })
-  })
+  ctx.tx.incr('size', { prefix: self.meta })
   // put store item
   ctx.tx.put(ctx.key, ctx.value)
 
@@ -159,10 +163,7 @@ function put (ctx, next) {
       var uniqs = Object.keys(counts)
       uniqs.forEach(function (token) {
         // increment nt
-        ctx.tx.get(token + '!', { prefix: self.tfidf }, function (err, nt) {
-          if (err && !err.notFound) return next(err)
-          ctx.tx.put(token + '!', (nt || 0) + 1, { prefix: self.tfidf })
-        })
+        ctx.tx.incr(token + '!', { prefix: self.tfidf })
         // put tf
         ctx.tx.put(token + '!' + ctx.key, counts[token] / total, { prefix: self.tfidf })
       })
@@ -204,10 +205,7 @@ function put (ctx, next) {
       var uniqs = Object.keys(tfs)
       uniqs.forEach(function (token) {
         // increment nt
-        ctx.tx.get(token + '!', { prefix: self.tfidf }, function (err, nt) {
-          if (err && !err.notFound) return next(err)
-          ctx.tx.put(token + '!', (nt || 0) + 1, { prefix: self.tfidf })
-        })
+        ctx.tx.incr(token + '!', { prefix: self.tfidf })
         // put tf
         ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.tfidf })
       })
