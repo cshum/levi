@@ -6,7 +6,7 @@ var xtend = require('xtend')
 var H = require('highland')
 var inherits = require('util').inherits
 var EventEmitter = require('events').EventEmitter
-// var sort = require('./sort')
+var sort = require('./sort')
 
 var END = '\uffff'
 
@@ -275,7 +275,7 @@ Levi.fn.searchStream = function (q, opts) {
       return !!data
     })
   })
-  // .reduce1(sort)
+  .reduce1(sort)
   .series()
   // todo score based on consine of vector space model
   /*

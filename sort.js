@@ -1,11 +1,11 @@
 var H = require('highland')
 var iterate = require('stream-iterate')
 
-// Stream merge sort modified from
+// merge sort taken from
 // https://github.com/mafintosh/stream-iterate/blob/master/test.js
 
 function toKey (val) {
-  return val[0].key
+  return val.key
 }
 
 module.exports = function (streamA, streamB) {
@@ -20,13 +20,16 @@ module.exports = function (streamA, streamB) {
 
         if (!dataA && !dataB) return push(null, H.nil)
 
-        if (!dataB || dataA < dataB) {
+        var keyA = dataA ? toKey(dataA) : undefined
+        var keyB = dataB ? toKey(dataB) : undefined
+
+        if (!dataB || keyA < keyB) {
           push(null, dataA)
           nextA()
           return next()
         }
 
-        if (!dataA || dataA > dataB) {
+        if (!dataA || keyA > keyB) {
           push(null, dataB)
           nextB()
           return next()
