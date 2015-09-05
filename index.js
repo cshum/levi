@@ -264,7 +264,7 @@ Levi.fn.searchStream = function (q, opts) {
         var nt = data.value
         idf = Math.log(1 + N / nt)
       } else {
-        var tf = data.value
+        var tf = Math.log(1 + data.value)
         return {
           token: token,
           key: data.key.slice(len),
