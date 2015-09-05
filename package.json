@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Streaming text search for Node.js and browser",
   "author": "Adrian C Shum <adrian@cshum.com> (https://github.com/cshum)",
+  "main": "lib/levi.js",
   "dependencies": {
     "ginga": "^1.1.1",
     "highland": "^2.5.1",
