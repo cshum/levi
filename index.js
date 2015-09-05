@@ -116,6 +116,7 @@ function del (ctx, next) {
     ctx.tx.del(ctx.key)
     // decrement size
     ctx.tx.get('size', { prefix: self.meta }, function (err, size) {
+      if (err && !err.notFound) return next(err)
       // size must be gt 0 here
       ctx.tx.put('size', size - 1, { prefix: self.meta })
     })
@@ -125,6 +126,7 @@ function del (ctx, next) {
       tokens.forEach(function (token) {
         // decrement nt
         ctx.tx.get(token + '!', { prefix: self.tfidf }, function (err, nt) {
+          if (err && !err.notFound) return next(err)
           ctx.tx.put(token + '!', nt - 1, { prefix: self.tfidf })
         })
         // del tf
@@ -142,6 +144,7 @@ function put (ctx, next) {
 
   // increment size
   ctx.tx.get('size', { prefix: self.meta }, function (err, size) {
+    if (err && !err.notFound) return next(err)
     ctx.tx.put('size', (size || 0) + 1, { prefix: self.meta })
   })
   // put store item
@@ -157,6 +160,7 @@ function put (ctx, next) {
       uniqs.forEach(function (token) {
         // increment nt
         ctx.tx.get(token + '!', { prefix: self.tfidf }, function (err, nt) {
+          if (err && !err.notFound) return next(err)
           ctx.tx.put(token + '!', (nt || 0) + 1, { prefix: self.tfidf })
         })
         // put tf
@@ -201,6 +205,7 @@ function put (ctx, next) {
       uniqs.forEach(function (token) {
         // increment nt
         ctx.tx.get(token + '!', { prefix: self.tfidf }, function (err, nt) {
+          if (err && !err.notFound) return next(err)
           ctx.tx.put(token + '!', (nt || 0) + 1, { prefix: self.tfidf })
         })
         // put tf
@@ -213,7 +218,7 @@ function put (ctx, next) {
   }
 }
 
-// commit index write 
+// commit index write
 function write (ctx, done) {
   ctx.tx.commit(done)
 }

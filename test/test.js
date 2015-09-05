@@ -16,7 +16,7 @@ test('CRUD', function (t) {
     a: 'hello world',
     b: 'the world sucks'
   }, {
-    fields: {a: 2, b: 1} 
+    fields: {a: 2, b: 1}
   }, function (err) {
     t.notOk(err)
     t.end()
@@ -24,7 +24,7 @@ test('CRUD', function (t) {
 })
 test('CRUD2', function (t) {
   lv.put(
-    'b', 
+    'b',
    'Lorem Ipsum sucks text of the printing and typesetting industry.',
    function (err) {
     t.notOk(err)
