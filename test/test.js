@@ -11,6 +11,8 @@ var lv = levi('./test/db', { db: down })
   .use(levi.stemmer())
   .use(levi.stopword())
 
+var live = lv.liveStream('hello lorem sucks')
+
 test('CRUD', function (t) {
   lv.put('a', {
     a: 'hello world',
@@ -36,6 +38,10 @@ test('CRUD', function (t) {
 })
 
 test('Search', function (t) {
-  lv.searchStream('hello lorem sucks')
-  .each(console.log.bind(console))
+  live
+  .each(console.log.bind(console, 'live'))
+
+  lv
+  .searchStream('hello lorem sucks')
+  .each(console.log.bind(console, 'search'))
 })

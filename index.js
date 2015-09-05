@@ -6,9 +6,11 @@ var xtend = require('xtend')
 var H = require('highland')
 var inherits = require('util').inherits
 var EventEmitter = require('events').EventEmitter
+var params = require('./params')
 var sort = require('./sort')
 var group = require('./group')
 var similar = require('./similar')
+var countTokens = require('./count')
 
 var END = '\uffff'
 
@@ -19,24 +21,6 @@ var defaults = {
 var override = {
   keyEncoding: 'utf8',
   valueEncoding: 'json'
-}
-
-// ginga params middleware
-function params () {
-  var names = Array.prototype.slice.call(arguments)
-  var len = names.length
-  return function (ctx) {
-    var l = Math.min(ctx.args.length, len)
-    for (var i = 0; i < l; i++) ctx[names[i]] = ctx.args[i]
-  }
-}
-
-function countTokens (tokens) {
-  var counts = {}
-  tokens.forEach(function (token) {
-    counts[token] = (counts[token] || 0) + 1
-  })
-  return counts
 }
 
 function Levi (dir, opts) {
@@ -80,9 +64,10 @@ Levi.fn.define('pipeline', params('value'), function (ctx, done) {
   if (!ctx.tokens) {
     return done(new Error('Missing tokenization pipeline.'))
   }
+
   H(ctx.tokens)
   .reject(function (token) {
-    return token.trim() === ''
+    return !token || token.trim() === ''
   })
   .collect()
   .pull(done)
@@ -166,7 +151,7 @@ function put (ctx, next) {
   var result = {
     key: ctx.key,
     value: ctx.value,
-    nt: {}
+    nts: {}
   }
   ctx.on('end', function (err) {
     if (err) return
@@ -225,7 +210,7 @@ function put (ctx, next) {
       // increment nt
       ctx.tx.incr(token + '!', { prefix: self.weight }, function (err, val) {
         if (err) return next(err)
-        result.nt[token] = val
+        result.nts[token] = val
       })
       // put tf
       ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.weight })
@@ -251,9 +236,10 @@ Levi.fn.createSearchStream =
 Levi.fn.searchStream = function (q, opts) {
   opts = xtend(this.options, opts)
   var self = this
+  var values = opts.values !== false
   var offset = Number(opts.offset) > 0 ? opts.offset : 0
   var limit = Number(opts.limit) > 0 ? opts.limit : Infinity
-  var values = opts.values !== false
+
   var N
   var query = {}
 
@@ -343,6 +329,48 @@ Levi.fn.searchStream = function (q, opts) {
 Levi.fn.createLiveStream =
 Levi.fn.liveStream = function (q, opts) {
   opts = xtend(this.options, opts)
+  var self = this
+
+  var live = H('_write', this)
+  var query = {}
+
+  return H(function (push, next) {
+    // pipeline query
+    self.pipeline(q, function (err, tokens) {
+      if (err) return push(err)
+      var total = tokens.length
+      var counts = countTokens(tokens)
+      var uniqs = Object.keys(counts)
+      uniqs.forEach(function (token) {
+        // calculate idf smooth for query
+        query[token] = Math.log(1 + (counts[token] / total))
+      })
+      next(live)
+    })
+  })
+  .map(function (data) {
+    // clone query coz idf are different on every emits
+    var xquery = xtend(query)
+    var vector = {}
+    for (var token in query) {
+      if (token in data.tfs) {
+        var N = data.size
+        var tf = Math.log(1 + data.tfs[token])
+        var nt = data.nts[token]
+        var idf = Math.log(1 + N / nt)
+        vector[token] = tf * idf
+        xquery[token] *= idf
+      }
+    }
+    return {
+      key: data.key,
+      score: similar(xquery, vector),
+      value: data.value
+    }
+  })
+  .filter(function (data) {
+    return data.score > 0
+  })
 }
 
 module.exports = Levi
