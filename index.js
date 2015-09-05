@@ -235,17 +235,25 @@ Levi.fn.searchStream = function (q, opts) {
   var values = opts.values !== false
   */
   var N
+  var query = {}
 
   return H(function (push, next) {
     // pipeline query
     self.pipeline(q, function (err, tokens) {
       if (err) return push(err)
+      var total = tokens.length
+      var counts = countTokens(tokens)
+      var uniqs = Object.keys(counts)
+      uniqs.forEach(function (token) {
+        // calculate idf smooth for query
+        query[token] = Math.log(1 + (counts[token] / total))
+      })
       // get N
       self.meta.get('size', function (err, size) {
         if (err && !err.notFound) return push(err)
         if (!size) return next(H([]))
         N = size
-        next(H(tokens))
+        next(H(uniqs))
       })
     })
   })
@@ -262,6 +270,9 @@ Levi.fn.searchStream = function (q, opts) {
         // idf smooth = log(1 + N/nt)
         var nt = data.value
         idf = Math.log(1 + N / nt)
+
+        // tfidf for query
+        query[token] *= idf
       } else {
         // tfidf = tf * idf
         var tf = Math.log(1 + data.value)
@@ -279,6 +290,16 @@ Levi.fn.searchStream = function (q, opts) {
   .reduce1(sort) // do merge sort since weight sorted by key
   .series()
   .through(group)
+  .map(function (data) {
+    var vector = {}
+    data.forEach(function (item) {
+      vector[item.token] = item.tfidf
+    })
+    return {
+      key: data[0].key,
+      vector: vector
+    }
+  })
   // todo score based on consine of vector space model
   /*
   .sortBy(function (a, b) {
