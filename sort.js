@@ -12,7 +12,7 @@ module.exports = function (streamA, streamB) {
   var readA = iterate(streamA)
   var readB = iterate(streamB)
 
-  return H(function (push, next) {
+  var stream = H(function (push, next) {
     readA(function (err, dataA, nextA) {
       if (err) return push(err)
       readB(function (err, dataB, nextB) {
@@ -43,4 +43,11 @@ module.exports = function (streamA, streamB) {
       })
     })
   })
+
+  stream.on('close', function () {
+    if (streamA.destroy) streamA.destroy()
+    if (streamB.destroy) streamB.destroy()
+  })
+
+  return stream
 }
