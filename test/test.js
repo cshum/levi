@@ -36,7 +36,6 @@ test('CRUD', function (t) {
 })
 
 test('Search', function (t) {
-  lv.searchStream('hello lorem sucks').each(function (data) {
-    console.log(data)
-  })
+  lv.searchStream('hello lorem sucks')
+  .each(console.log.bind(console))
 })

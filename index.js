@@ -80,7 +80,12 @@ Levi.fn.define('pipeline', params('value'), function (ctx, done) {
   if (!ctx.tokens) {
     return done(new Error('Missing tokenization pipeline.'))
   }
-  H(ctx.tokens).collect().pull(done)
+  H(ctx.tokens)
+  .reject(function (token) {
+    return token.trim() === ''
+  })
+  .collect()
+  .pull(done)
 })
 
 function pre (ctx, next) {
@@ -88,16 +93,20 @@ function pre (ctx, next) {
 
   // prepare transaction
   ctx.tx = transaction(this.store)
-  ctx.tx.incr = function (key, options) {
+  ctx.tx.incr = function (key, options, cb) {
     this.get(key, options, function (err, val) {
       if (err && !err.notFound) return next(err)
-      this.put(key, (val || 0) + 1, options)
+      val = (val || 0) + 1
+      if (cb) cb(null, val)
+      this.put(key, val, options)
     })
   }
-  ctx.tx.decr = function (key, options) {
+  ctx.tx.decr = function (key, options, cb) {
     this.get(key, options, function (err, val) {
       if (err && !err.notFound) return next(err)
-      this.put(key, (val || 0) - 1, options)
+      val = (val || 0) - 1
+      if (cb) cb(null, val)
+      this.put(key, val, options)
     })
   }
   ctx.on('end', function (err) {
@@ -147,8 +156,23 @@ function put (ctx, next) {
   var self = this
   if (!ctx.value) return next(new Error('Value required.'))
 
+  // result for emitter
+  var result = {
+    key: ctx.key,
+    value: ctx.value,
+    nt: {}
+  }
+  ctx.on('end', function (err) {
+    if (err) return
+    self.emit('put', { key: ctx.key, value: ctx.value })
+    self.emit('_write', result)
+  })
+
   // increment size
-  ctx.tx.incr('size', { prefix: self.meta })
+  ctx.tx.incr('size', { prefix: self.meta }, function (err, val) {
+    if (err) return next(err)
+    result.size = val
+  })
   // put store item
   ctx.tx.put(ctx.key, ctx.value)
 
@@ -193,12 +217,17 @@ function put (ctx, next) {
     var uniqs = Object.keys(tfs)
     uniqs.forEach(function (token) {
       // increment nt
-      ctx.tx.incr(token + '!', { prefix: self.weight })
+      ctx.tx.incr(token + '!', { prefix: self.weight }, function (err, val) {
+        if (err) return next(err)
+        result.nt[token] = val
+      })
       // put tf
       ctx.tx.put(token + '!' + ctx.key, tfs[token], { prefix: self.weight })
     })
+    result.tfs = tfs
     // put tokens
     ctx.tx.put(ctx.key, uniqs, { prefix: self.tokens })
+
     next()
   })
 }
