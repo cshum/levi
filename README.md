@@ -2,6 +2,10 @@
 
 Streaming full-text search for Node.js and browsers. Using LevelDB as storage backend.
 
+```
+npm install levi
+```
+
 Levi implements full-text search using TF-IDF with field boost options, 
 relevancy scoring using cosine similarity. 
 Levi provides the typical text processing pipeline: Tokenizer, Porter Stemmer, and English Stopwords Filter. 
