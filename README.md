@@ -9,12 +9,12 @@ npm install levi
 Levi implements full-text search using TF-IDF with field boost options, 
 relevancy scoring using cosine similarity. 
 Levi provides the typical text processing pipeline: Tokenizer, Porter Stemmer, and English Stopwords Filter. 
-These are exposed as [Ginga](https://github.com/cshum/ginga) plugins so that they can be swapped for different configurations.
+These are exposed as [Ginga](https://github.com/cshum/ginga) plugins so that they can be swapped for different language configurations.
 
-Levi heavily inspired from [lunr.js](http://lunrjs.com/). 
+Levi is heavily inspired from [lunr.js](http://lunrjs.com/). 
 But instead of synchronous in-memory store, Levi leverages [LevelUP](https://github.com/Level/levelup) for asynchronous, 
 [transactional](https://github.com/cshum/level-transactions/) storage interface.
-By default, Levi uses [LevelDB](https://github.com/Level/leveldown) on Node.js and IndexedDB on browser. 
+By default, Levi uses [LevelDB](https://github.com/Level/leveldown) on Node.js and [IndexedDB](https://github.com/maxogden/level.js) on browser. 
 Also works with a variety of LevelDOWN compatible backends.
 
 In addition, Levi provides relevancy scoring on live streaming data feeds.
@@ -27,7 +27,7 @@ This a very preferable for live changing data since this does not require databa
 which means significantly faster processing.
 
 Levi search interface is built on [Highland](http://highlandjs.org/), a Node compatible stream with async and functional programming concepts. 
-Stream avoid processing whole batch of data in one go, 
+Streams avoid processing whole batch of data in one go, 
 Levi is designed to be non-blocking and memory efficient.
 
 ## API
@@ -39,8 +39,7 @@ Levi is designed to be non-blocking and memory efficient.
 var lv = levi('db', {
   fields: {
     title: 1,
-    body: 1,
-    tags: 10
+    body: 10
   }
 })
 .use(levi.tokenizer())

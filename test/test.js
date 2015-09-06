@@ -94,7 +94,7 @@ test('Search', function (t) {
   .done(function () {
     lv.searchStream('green plant').toArray(function (arr) {
       console.log(arr)
-      t.equal(arr.length, 2, 'correct result')
+      t.equal(arr.length, 3, 'correct result')
       t.equal(arr[0].id, 'b', 'correct result')
     })
 
