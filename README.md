@@ -1,6 +1,6 @@
 # Levi
 
-Streaming text search for Node.js and browsers. Using LevelDB as storage backend.
+Streaming full-text search for Node.js and browsers. Using LevelDB as storage backend.
 
 Levi heavily inspired from [lunr.js](http://lunrjs.com/). 
 But instead of synchronous in-memory store, Levi leverages [LevelUP](https://github.com/Level/levelup) for asynchronous, 
@@ -32,6 +32,8 @@ Levi provides text processing pipeline: Tokenizer, Porter Stemmer, and English S
 
 ### .put(key, value, [opts])
 ### .del(key, [opts])
+### .get(key, [opts])
+Fetching value from the store. Behaves exactly live LevelUP's [`get()`](https://github.com/Level/levelup#get)
 
 ### .searchStream(query, [opts])
 
