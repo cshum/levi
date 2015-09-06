@@ -4,7 +4,7 @@ Streaming text search for Node.js and browsers. Using LevelDB as storage backend
 
 Levi heavily inspired from [lunr.js](http://lunrjs.com/). 
 But instead of synchronous in-memory store, Levi leverages [LevelUP](https://github.com/Level/levelup) for asynchronous, 
-durable, [transactional](https://github.com/cshum/level-transactions/) storage interface.
+[transactional](https://github.com/cshum/level-transactions/) storage interface.
 By default, Levi uses [LevelDB](https://github.com/Level/leveldown) on Node.js and IndexedDB on browser. 
 Also works with a variety of LevelDOWN compatible backends.
 
