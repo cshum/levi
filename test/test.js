@@ -13,7 +13,7 @@ var lv = levi(db)
   .use(levi.stemmer())
   .use(levi.stopword())
 
-test('PUT', function (t) {
+test('put', function (t) {
   var aObj = {
     a: 'hello world',
     b: 'the world sucks'
@@ -48,7 +48,7 @@ test('PUT', function (t) {
   })
 })
 
-test('DEL', function (t) {
+test('del', function (t) {
   lv.del('a')
   lv.del('b')
   lv.del('c', function (err) {
@@ -56,8 +56,7 @@ test('DEL', function (t) {
     lv.meta.get('size', function (err, size) {
       t.notOk(err && !err.notFound)
       t.notOk(size, 'empty after delete all')
-      H(db.createReadStream())
-      .toArray(function (arr) {
+      H(db.readStream()).toArray(function (arr) {
         t.equal(arr.length, 0, 'empty after delete all')
         t.end()
       })
@@ -65,13 +64,39 @@ test('DEL', function (t) {
   })
 })
 
-/*
+// test data from https://github.com/olivernn/lunr.js/blob/master/test/search_test.js
 test('Search', function (t) {
-  live
-  .each(console.log.bind(console, 'live'))
+  H([{
+    id: 'a',
+    title: 'Mr. Green kills Colonel Mustard',
+    body: 'Mr. Green killed Colonel Mustard in the study with the candlestick. Mr. Green is not a very nice fellow.'
+  }, {
+    id: 'b',
+    title: 'Plumb waters plant',
+    body: 'Professor Plumb has a green plant in his study'
+  }, {
+    id: 'c',
+    title: 'Scarlett helps Professor',
+    body: 'Miss Scarlett watered Professor Plumbs green plant while he was away from his office last week.'
+  }, {
+    id: 'd',
+    title: 'title',
+    body: 'handsome'
+  }, {
+    id: 'e',
+    title: 'title',
+    body: 'hand'
+  }])
+  .map(H.wrapCallback(function (doc, cb) {
+    lv.put(doc.id, doc, { fields: { title: 10, body: 1 } }, cb)
+  }))
+  .series()
+  .done(function () {
+    lv.searchStream('green plant').toArray(function (arr) {
+      console.log(arr)
+      t.equal(arr.length, 2, 'correct result')
+      t.equal(arr[0].id, 'b', 'correct result')
+    })
 
-  lv
-  .searchStream('hello lorem sucks')
-  .each(console.log.bind(console, 'search'))
+  })
 })
-*/
