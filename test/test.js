@@ -13,6 +13,18 @@ var lv = levi(db)
   .use(levi.stemmer())
   .use(levi.stopword())
 
+var similarity = require('../lib/util/similarity')
+test('similarity', function (t) {
+  var v1 = {x: 1, y: 3, z: -5}
+  var v2 = {x: 4, y: -2, z: -1}
+
+  var similar = similarity(v1, v2)
+  var rounded = Math.round(similar * 1000) / 1000
+
+  t.equal(rounded, 0.111)
+  t.end()
+})
+
 test('put', function (t) {
   var aObj = {
     a: 'hello world',
