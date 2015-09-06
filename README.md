@@ -32,4 +32,10 @@ Levi provides the typical text processing pipeline: tokenizer, porter stemmer an
 
 ### .liveStream(query)
 
-Live stream approximates the score for live incoming results. This is done based on the evaluation of …, where TC-ICF approximate the TF-IDF score based on  corpus already have. The score can be relatively accurate to TF-IDF when the corpus size is large. This a very perferable for live changing data feeds since TF-ICF is O(n) plus liveStream() does not perform a database scans, which means significantly faster processing.
+`liveStream()` approximates score for live incoming results. This is done based on the evaluation of 
+[TF-ICF: A New Term Weighting Scheme for Clustering Dynamic Data Streams](http://cda.ornl.gov/publications/ICMLA06.pdf), 
+where TC-ICF approximate TF-IDF score based on corpus already have.
+The score can be relatively accurate to TF-IDF when the corpus size is large. 
+This a very preferable for live changing data feeds since TF-ICF is
+O(n) plus `liveStream()` does not require database scans, 
+which means significantly faster processing.
