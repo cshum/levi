@@ -1,19 +1,19 @@
 require('rimraf').sync('./test/db')
 var levi = require('../')
+var similarity = require('../lib/util/similarity')
 
 var test = require('tape')
 var levelup = require('levelup')
-var down = require('jsondown')
-// var down = require('leveldown')
+// var down = require('jsondown')
+var down = require('leveldown')
 var db = levelup('./test/db', { db: down })
 var H = require('highland')
 
 var lv = levi(db)
-  .use(levi.tokenizer())
-  .use(levi.stemmer())
-  .use(levi.stopword())
+.use(levi.tokenizer())
+.use(levi.stemmer())
+.use(levi.stopword())
 
-var similarity = require('../lib/util/similarity')
 test('similarity', function (t) {
   t.equal(Math.round(similarity(
     {x: 1, y: 3, z: -5},
@@ -80,7 +80,8 @@ test('Search', function (t) {
   H([{
     id: 'a',
     title: 'Mr. Green kills Colonel Mustard',
-    body: 'Mr. Green killed Colonel Mustard in the study with the candlestick. Mr. Green is not a very nice fellow.'
+    body: 'Mr. Green killed Colonel Mustard in the study with the candlestick. '+
+      'Mr. Green is not a very nice fellow.'
   }, {
     id: 'b',
     title: 'Plumb waters plant',
@@ -88,11 +89,12 @@ test('Search', function (t) {
   }, {
     id: 'c',
     title: 'Scarlett helps Professor',
-    body: 'Miss Scarlett watered Professor Plumbs green plant while he was away from his office last week.'
+    body: 'Miss Scarlett watered Professor Plumbs green plant while he was away '+
+      'from his office last week.'
   }, {
     id: 'd',
-    title: 'title',
-    body: 'handsome'
+    title: 'foo',
+    body: 'bar'
   }])
   .map(H.wrapCallback(function (doc, cb) {
     lv.put(doc.id, doc, cb)
@@ -111,9 +113,9 @@ test('Search', function (t) {
       })
     })
 
-    lv.searchStream('plant', { fields: { title: true }}).toArray(function (arr) {
+    lv.searchStream('green', { fields: { title: true }}).toArray(function (arr) {
       t.equal(arr.length, 1, 'fielded: correct number of results')
-      t.equal(arr[0].key, 'b', 'fielded: correct result')
+      t.equal(arr[0].key, 'a', 'fielded: correct result')
     })
 
   })
