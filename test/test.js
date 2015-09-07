@@ -28,9 +28,7 @@ test('put', function (t) {
     a: 'hello world',
     b: 'the world sucks'
   }
-  lv.put('a', aObj, {
-    fields: {a: 2, b: 1}
-  }, function () {
+  lv.put('a', aObj, function () {
     lv.get('a', function (err, value) {
       t.notOk(err)
       t.deepEqual(value, aObj, 'fielded object')
@@ -98,11 +96,11 @@ test('Search', function (t) {
     body: 'hand'
   }])
   .map(H.wrapCallback(function (doc, cb) {
-    lv.put(doc.id, doc, { fields: { title: 10, body: 1 } }, cb)
+    lv.put(doc.id, doc, cb)
   }))
   .series()
   .done(function () {
-    lv.searchStream('green plant').toArray(function (arr) {
+    lv.searchStream('green plant', { fields: { title: 10, body: 1 } }).toArray(function (arr) {
       console.log(arr)
       t.equal(arr.length, 3, 'correct result')
       t.equal(arr[0].id, 'b', 'correct result')
