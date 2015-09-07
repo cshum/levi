@@ -14,6 +14,14 @@ var lv = levi(db)
 .use(levi.stemmer())
 .use(levi.stopword())
 
+test('pipeline', function (t) {
+  lv.pipeline('Aldus PageMaker including versions of Lorem Ipsum.', function (err, tokens) {
+    t.notOk(err)
+    t.deepEquals(tokens, ['aldu', 'pagemak', 'includ', 'version', 'lorem', 'ipsum'])
+    t.end()
+  })
+})
+
 test('similarity', function (t) {
   t.equal(Math.round(similarity(
     {x: 1, y: 3, z: -5, foo: 0},
