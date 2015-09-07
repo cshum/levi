@@ -73,11 +73,9 @@ test('del', function (t) {
 })
 
 test('Search', function (t) {
-  t.plan(3)
+  t.plan(5)
 
-  var live = lv.liveStream('green plant', {
-    fields: { title: 10, body: 1 } 
-  })
+  var live = lv.liveStream('green plant')
 
   H([{
     id: 'a',
@@ -95,30 +93,28 @@ test('Search', function (t) {
     id: 'd',
     title: 'title',
     body: 'handsome'
-  }, {
-    id: 'e',
-    title: 'title',
-    body: 'hand'
   }])
   .map(H.wrapCallback(function (doc, cb) {
     lv.put(doc.id, doc, cb)
   }))
   .series()
   .done(function () {
-    lv.searchStream('green plant', {
-      fields: { title: 10, body: 1 } 
-    }).toArray(function (arr) {
-      t.equal(arr.length, 3, 'correct search')
-      t.equal(arr[0].key, 'b', 'correct search')
+    lv.searchStream('green plant').toArray(function (arr) {
+      t.equal(arr.length, 3, 'search: correct number of results')
+      t.equal(arr[0].key, 'b', 'search: correct score')
 
       live.take(3).last().pull(function (err, res) {
         t.equal(
           res.score, arr[2].score, 
-          'last live score identical to search score'
+          'live: last score identical to search score'
         )
       })
     })
 
+    lv.searchStream('plant', { fields: { title: true }}).toArray(function (arr) {
+      t.equal(arr.length, 1, 'fielded: correct number of results')
+      t.equal(arr[0].key, 'b', 'fielded: correct result')
+    })
 
   })
 })
