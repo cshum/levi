@@ -76,14 +76,14 @@ test('del', function (t) {
 })
 
 test('Search', function (t) {
-  t.plan(7)
+  t.plan(8)
 
   var live = lv.liveStream('green plant')
 
   H([{
     id: 'a',
     title: 'Mr. Green kills Colonel Mustard',
-    body: 'Mr. Green killed Colonel Mustard in the study with the candlestick. '+
+    body: 'Mr. Green killed Colonel Mustard in the study with the candlestick. ' +
       'Mr. Green is not a very nice fellow.'
   }, {
     id: 'b',
@@ -92,7 +92,7 @@ test('Search', function (t) {
   }, {
     id: 'c',
     title: 'Scarlett helps Professor',
-    body: 'Miss Scarlett watered Professor Plumbs green plant while he was away '+
+    body: 'Miss Scarlett watered Professor Plumbs green plant while he was away ' +
       'from his office last week.'
   }, {
     id: 'd',
@@ -108,15 +108,18 @@ test('Search', function (t) {
       t.equal(arr.length, 3, 'search: correct number of results')
       t.equal(arr[0].key, 'b', 'search: correct score')
 
+      // lv.searchStream(['green', 'plant', 'sucks']).toArray(function (arr2) {
+      //   t.deepEqual(arr2, arr, 'tokenized query')
+      // })
+
       live.take(3).last().pull(function (err, res) {
-        t.equal(
-          res.score, arr[2].score, 
-          'live: last score identical to search score'
-        )
+        t.notOk(err)
+        t.equal(res.score, arr[2].score,
+          'live: last score identical to search score')
       })
     })
 
-    lv.searchStream('green', { fields: { title: true }}).toArray(function (arr) {
+    lv.searchStream('green', { fields: { title: true } }).toArray(function (arr) {
       t.equal(arr.length, 1, 'fielded: correct number of results')
       t.equal(arr[0].key, 'a', 'fielded: correct result')
     })
