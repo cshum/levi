@@ -74,6 +74,8 @@ test('del', function (t) {
 
 // test data from https://github.com/olivernn/lunr.js/blob/master/test/search_test.js
 test('Search', function (t) {
+  t.plan(2)
+
   H([{
     id: 'a',
     title: 'Mr. Green kills Colonel Mustard',
@@ -100,10 +102,11 @@ test('Search', function (t) {
   }))
   .series()
   .done(function () {
-    lv.searchStream('green plant', { fields: { title: 10, body: 1 } }).toArray(function (arr) {
-      console.log(arr)
+    lv.searchStream('green plant', {
+      fields: { title: 10, body: 1 } 
+    }).toArray(function (arr) {
       t.equal(arr.length, 3, 'correct result')
-      t.equal(arr[0].id, 'b', 'correct result')
+      t.equal(arr[0].key, 'b', 'correct result')
     })
 
   })
