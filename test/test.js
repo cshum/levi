@@ -1,16 +1,13 @@
 require('rimraf').sync('./test/db')
+var test = require('tape')
+
 var levi = require('../')
 var similarity = require('../lib/util/similarity')
 var group = require('../lib/util/group')
 
-var test = require('tape')
-var levelup = require('levelup')
-// var down = require('jsondown')
-var down = require('leveldown')
-var db = levelup('./test/db', { db: down })
 var H = require('highland')
 
-var lv = levi(db)
+var lv = levi('./test/db')
 .use(levi.tokenizer())
 .use(levi.stemmer())
 .use(levi.stopword())
@@ -94,10 +91,7 @@ test('del', function (t) {
     lv.meta.get('size', function (err, size) {
       t.notOk(err && !err.notFound)
       t.notOk(size, 'empty after delete all')
-      H(db.readStream()).toArray(function (arr) {
-        t.equal(arr.length, 0, 'empty after delete all')
-        t.end()
-      })
+      t.end()
     })
   })
 })
