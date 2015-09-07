@@ -76,7 +76,7 @@ test('del', function (t) {
 })
 
 test('Search', function (t) {
-  t.plan(5)
+  t.plan(7)
 
   var live = lv.liveStream('green plant')
 
@@ -119,6 +119,11 @@ test('Search', function (t) {
     lv.searchStream('green', { fields: { title: true }}).toArray(function (arr) {
       t.equal(arr.length, 1, 'fielded: correct number of results')
       t.equal(arr[0].key, 'a', 'fielded: correct result')
+    })
+
+    lv.searchStream('watering plant', { fields: { title: 1, body: 10 } }).toArray(function (arr) {
+      t.equal(arr.length, 2, 'field boosting: correct number of results')
+      t.equal(arr[0].key, 'c', 'field boosting: correct boosted result')
     })
 
   })
