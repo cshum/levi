@@ -44,8 +44,8 @@ alternatively passing a section of [SublevelUP](https://github.com/cshum/subleve
 var sublevel = require('sublevelup')
 var db = sublevel(levelup('db'))
 
-// passing db section `levi`
-var lv = levi(db.sublevel('levi'))
+// passing db section `search`
+var lv = levi(db.sublevel('search'))
 .use(levi.tokenizer())
 .use(levi.stemmer())
 .use(levi.stopword())
@@ -53,7 +53,7 @@ var lv = levi(db.sublevel('levi'))
 ```
 
 Text processing pipeline `levi.tokenizer()`, `levi.stemmer()`, `levi.stopword()` are required for indexing.
-These are exposed as plugins so that they can be swapped for different language configurations.
+These are exposed as [ginga](https://github.com/cshum/ginga) plugins so that they can be swapped for different language configurations.
 
 ### .put(key, value, [options], [callback])
 
@@ -106,16 +106,27 @@ lv.searchStream('lorem ipusm', {
 }).pipe(...)
 ```
 
-results are of form
+result is of form
 
 ```js
+{
+  key: 'b',
+  score: 0.5972843431749838,
+  value: { 
+    id: 'b',
+    title: 'Lorem Ipsum',
+    body: 'Dummy text of the printing and typesetting industry.'
+  } 
+}
 ```
 
 ### .liveStream(query, [options])
 
-Approximates relevancy score as soon as documents being indexed. 
-This a very preferable for live changing data since this requires very little database scans, 
-which means significantly faster processing.
+Approximate relevancy score as soon as documents being indexed. 
+A non-ending [highland](http://highlandjs.org/) object stream.
+
+This should be used only when having sufficiently large amount of indexed documents, as relevancy score may be fluctuating at the beginning.
+But very preferable for large amount of live streaming data since `liveStream()` requires almost no database scans, which means significantly faster processing.
 
 ## License
 
