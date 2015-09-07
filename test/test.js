@@ -81,7 +81,7 @@ test('del', function (t) {
 })
 
 test('Search', function (t) {
-  t.plan(9)
+  t.plan(11)
 
   var live = lv.liveStream('green plant')
 
@@ -115,6 +115,14 @@ test('Search', function (t) {
 
       lv.searchStream(['green', 'plant']).toArray(function (arr2) {
         t.deepEqual(arr2, arr, 'tokenized query')
+      })
+
+      lv.searchStream('green plant', { offset: 1 }).toArray(function (arr2) {
+        t.deepEqual(arr2, arr.slice(1), 'query offset')
+      })
+
+      lv.searchStream('green plant', { limit: 1 }).toArray(function (arr2) {
+        t.deepEqual(arr2, arr.slice(0, 1), 'limit')
       })
 
       live.take(3).last().pull(function (err, res) {
