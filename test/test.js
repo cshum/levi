@@ -1,6 +1,7 @@
 require('rimraf').sync('./test/db')
 var levi = require('../')
 var similarity = require('../lib/util/similarity')
+var group = require('../lib/util/group')
 
 var test = require('tape')
 var levelup = require('levelup')
@@ -17,7 +18,20 @@ var lv = levi(db)
 test('pipeline', function (t) {
   lv.pipeline('Aldus PageMaker including versions of Lorem Ipsum.', function (err, tokens) {
     t.notOk(err)
-    t.deepEquals(tokens, ['aldu', 'pagemak', 'includ', 'version', 'lorem', 'ipsum'])
+    t.deepEqual(tokens, ['aldu', 'pagemak', 'includ', 'version', 'lorem', 'ipsum'])
+    t.end()
+  })
+})
+
+test('grouping', function (t) {
+  H([{key: 1}, {key: 1}, {key: 2}, {key: 3}, {key: 3}])
+  .through(group)
+  .toArray(function (arr) {
+    t.deepEqual(arr, [
+      [ { key: 1 }, { key: 1 } ],
+      [ { key: 2 } ],
+      [ { key: 3 }, { key: 3 } ]
+    ], 'grouping')
     t.end()
   })
 })
