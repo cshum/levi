@@ -105,7 +105,6 @@ test('Search', function (t) {
   .series()
   .done(function () {
     lv.searchStream('green plant').toArray(function (arr) {
-      console.log(arr)
       t.equal(arr.length, 3, 'search: correct number of results')
       t.equal(arr[0].key, 'b', 'search: correct score')
 
