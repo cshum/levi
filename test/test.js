@@ -76,7 +76,7 @@ test('del', function (t) {
 })
 
 test('Search', function (t) {
-  t.plan(8)
+  t.plan(9)
 
   var live = lv.liveStream('green plant')
 
@@ -108,9 +108,9 @@ test('Search', function (t) {
       t.equal(arr.length, 3, 'search: correct number of results')
       t.equal(arr[0].key, 'b', 'search: correct score')
 
-      // lv.searchStream(['green', 'plant', 'sucks']).toArray(function (arr2) {
-      //   t.deepEqual(arr2, arr, 'tokenized query')
-      // })
+      lv.searchStream(['green', 'plant']).toArray(function (arr2) {
+        t.deepEqual(arr2, arr, 'tokenized query')
+      })
 
       live.take(3).last().pull(function (err, res) {
         t.notOk(err)

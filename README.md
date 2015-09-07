@@ -86,6 +86,8 @@ The main search interface of Levi, a Node compatible [highland](http://highlandj
 lv.searchStream('lorem ipsum')
 .toArray(function (results) { ... }) // highland method
 
+lv.searchStream(['lorem', 'ipsum']).pipe(...) // tokenized array query
+
 lv.searchStream('lorem ipsum', {
   fields: { title: 10, '*': 1 } // title field boost
 }).pipe(...)
