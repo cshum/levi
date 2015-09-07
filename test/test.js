@@ -128,6 +128,5 @@ test('Search', function (t) {
       t.equal(arr.length, 2, 'field boosting: correct number of results')
       t.equal(arr[0].key, 'c', 'field boosting: correct boosted result')
     })
-
   })
 })
