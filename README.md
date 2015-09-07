@@ -51,7 +51,7 @@ alternatively passing [SublevelUP](https://github.com/cshum/sublevelup) section.
 var sublevel = require('sublevelup')
 var db = sublevel(levelup('db'))
 
-// passing sublevel of SublevelUP
+// passing db section `levi`
 var lv = levi(db.sublevel('levi'))
 .use(levi.tokenizer())
 .use(levi.stemmer())

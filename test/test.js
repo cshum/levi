@@ -105,6 +105,7 @@ test('Search', function (t) {
     lv.searchStream('green plant', {
       fields: { title: 10, body: 1 } 
     }).toArray(function (arr) {
+      console.log(arr)
       t.equal(arr.length, 3, 'correct result')
       t.equal(arr[0].key, 'b', 'correct result')
     })
