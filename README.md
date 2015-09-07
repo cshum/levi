@@ -51,12 +51,17 @@ var lv = levi(db.sublevel('levi'))
 ```
 
 Text processing plugins `levi.tokenizer()`, `levi.stemmer()`, `levi.stopword()` are required for indexing.
-These are exposed as [ginga](https://github.com/cshum/ginga) plugins so that they can be swapped for different language configurations.
+These are exposed as plugins so that they can be swapped for different language configurations.
 
 ### .put(key, value, [opts])
+Index document identified by `key`. `value` can be Object, String or Buffer.
+Use fielded Object for `value` if you want field boosting for search.
+
 ### .del(key, [opts])
+Delete document `key` from index.
+
 ### .get(key, [opts])
-Fetching value from the store. Behaves exactly like LevelUP's [`get()`](https://github.com/Level/levelup#get)
+Fetch value from the store. Behaves exactly like LevelUP's [`get()`](https://github.com/Level/levelup#get)
 
 ### .searchStream(query, [opts])
 
