@@ -1,4 +1,9 @@
-require('rimraf').sync('./test/db')
+if (!process.browser) {
+  require('rimraf').sync('./test/db')
+} else {
+  require('level-js').destroy('./test/db', function () {})
+}
+
 var test = require('tape')
 
 var levi = require('../')
