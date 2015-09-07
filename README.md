@@ -17,7 +17,7 @@ Also works with a variety of LevelDOWN compatible backends.
 
 In addition, Levi provides relevancy scoring for live changing data using [TF-ICF](http://cda.ornl.gov/publications/ICMLA06.pdf) - a TF-IDF approximation based on existing corpus.
 Such scoring is comparably close to TF-IDF when existing corpus is sufficiently large and diverse,
-and with significantly better efficiency.
+and with significantly better efficiency `O(N)` instead of `O(N^2)`.
 
 ## API
 
@@ -60,12 +60,9 @@ Fetching value from the store. Behaves exactly like LevelUP's [`get()`](https://
 
 ### .searchStream(query, [opts])
 
-* TF-IDF
-* Cosine similarity
-
 ### .liveStream(query, [opts])
 
-`liveStream()` approximates relevancy score for live incoming results. 
+Approximates relevancy score for live changing data. 
 This a very preferable for live changing data since this does not require database scans, 
 which means significantly faster processing.
 
