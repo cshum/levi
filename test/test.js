@@ -26,15 +26,15 @@ test('similarity', function (t) {
 test('put', function (t) {
   var aObj = {
     a: 'hello world',
-    b: 'the world sucks'
+    b: 'world sucks'
   }
   lv.put('a', aObj, function () {
     lv.get('a', function (err, value) {
       t.notOk(err)
-      t.deepEqual(value, aObj, 'fielded object')
+      t.deepEqual(value, aObj, 'put object')
     })
   })
-  var bText = 'Lorem Ipsum sucks text of the printing and typesetting industry.'
+  var bText = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'
   lv.put('b', new Buffer(bText), function () {
     lv.get('b', function (err, value) {
       t.notOk(err)
@@ -50,7 +50,10 @@ test('put', function (t) {
       lv.meta.get('size', function (err, size) {
         t.notOk(err)
         t.equal(size, 3, 'size correct')
-        t.end()
+        lv.searchStream('aldus pagemaker').toArray(function (arr) {
+          t.equal(arr[0].key, 'c', 'text searchable')
+          t.end()
+        })
       })
     })
   })
