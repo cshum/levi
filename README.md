@@ -6,34 +6,25 @@ Streaming full-text search for Node.js and browsers. Using LevelDB as storage ba
 npm install levi
 ```
 
-Full-text search based on TF-IDF, 
-cosine similarity relevancy scoring, and field boosting in query time.
-The text processing pipeline contains Tokenizer, Porter Stemmer, and English Stopwords Filter. 
-These are exposed as [Ginga](https://github.com/cshum/ginga) plugins so that they can be swapped for different language configurations.
+Full-text search based on TF-IDF and cosine similarity, 
+stream based search mechanism with query-time field boosting.
+Provided with a configurable text processing pipeline: Tokenizer, Stemmer, and Stopwords. 
 
 Levi leverages [LevelUP](https://github.com/Level/levelup) for asynchronous, 
 [transactional](https://github.com/cshum/level-transactions/) storage interface.
 By default, it uses [LevelDB](https://github.com/Level/leveldown) on Node.js and [IndexedDB](https://github.com/maxogden/level.js) on browser. 
 Also works with a variety of LevelDOWN compatible backends.
-Search interface is built on [Highland](http://highlandjs.org/), a Node compatible stream with async and functional programming concepts. 
 
-
-In addition, Levi provides relevancy scoring on live streaming data feeds.
-This is done using TF-ICF - a TF-IDF approximation based on already processed corpus.
-From the evaluation of 
-[TF-ICF: A New Term Weighting Scheme for Clustering Dynamic Data Streams](http://cda.ornl.gov/publications/ICMLA06.pdf), 
-such score can be relatively accurate to TF-IDF when the corpus 
-is sufficiently large and diverse.
-This a very preferable for live changing data since this does not require database scans, 
-which means significantly faster processing.
-
+In addition, Levi provides relevancy scoring for live changing data using [TF-ICF](http://cda.ornl.gov/publications/ICMLA06.pdf) - a TF-IDF approximation based on existing corpus.
+Such scoring is comparably close to TF-IDF when existing corpus is sufficiently large and diverse,
+and with significantly better efficiency.
 
 ## API
 
 ### levi(dir, [opts])
 ### levi(sublevel, [opts])
 
-Initialize Levi with database path and the required plugins `levi.tokenizer()`, `levi.stemmer()`, `levi.stopword()`.
+Initialize Levi with [LevelUP's](https://github.com/Level/levelup#ctor) db path.
 
 ```js
 var levi = require('levi')
@@ -45,7 +36,7 @@ var lv = levi('db')
 .use(levi.stopword())
 
 ```
-alternatively passing [SublevelUP](https://github.com/cshum/sublevelup) section.
+alternatively passing a section of [SublevelUP](https://github.com/cshum/sublevelup).
 
 ```js
 var sublevel = require('sublevelup')
@@ -58,6 +49,9 @@ var lv = levi(db.sublevel('levi'))
 .use(levi.stopword())
 
 ```
+
+Text processing plugins `levi.tokenizer()`, `levi.stemmer()`, `levi.stopword()` are required for indexing.
+These are exposed as [ginga](https://github.com/cshum/ginga) plugins so that they can be swapped for different language configurations.
 
 ### .put(key, value, [opts])
 ### .del(key, [opts])
@@ -72,6 +66,8 @@ Fetching value from the store. Behaves exactly like LevelUP's [`get()`](https://
 ### .liveStream(query, [opts])
 
 `liveStream()` approximates relevancy score for live incoming results. 
+This a very preferable for live changing data since this does not require database scans, 
+which means significantly faster processing.
 
 ## License
 
