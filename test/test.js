@@ -72,9 +72,12 @@ test('del', function (t) {
   })
 })
 
-// test data from https://github.com/olivernn/lunr.js/blob/master/test/search_test.js
 test('Search', function (t) {
-  t.plan(2)
+  t.plan(3)
+
+  var live = lv.liveStream('green plant', {
+    fields: { title: 10, body: 1 } 
+  })
 
   H([{
     id: 'a',
@@ -105,10 +108,17 @@ test('Search', function (t) {
     lv.searchStream('green plant', {
       fields: { title: 10, body: 1 } 
     }).toArray(function (arr) {
-      console.log(arr)
-      t.equal(arr.length, 3, 'correct result')
-      t.equal(arr[0].key, 'b', 'correct result')
+      t.equal(arr.length, 3, 'correct search')
+      t.equal(arr[0].key, 'b', 'correct search')
+
+      live.take(3).last().pull(function (err, res) {
+        t.equal(
+          res.score, arr[2].score, 
+          'last live score identical to search score'
+        )
+      })
     })
+
 
   })
 })
