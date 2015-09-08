@@ -85,24 +85,29 @@ test('CRUD', function (t) {
 
   lv.put('d', 'Rick rolling', function (err) {
     t.notOk(err)
-    lv.put('d', 'Rick Ashley', function (err) {
-      t.notOk(err)
-      lv.searchStream('rolling').toArray(function (arr) {
-        t.equal(arr.length, 0, 'correct clean up')
-        lv.searchStream('ashley').toArray(function (arr) {
-          t.equal(arr.length, 1, 'correct upsert')
-          t.equal(arr[0].key, 'd', 'correct upsert')
-          t.equal(arr[0].value, 'Rick Ashley', 'correct upsert')
+    lv.searchStream('rolling and hatin').toArray(function (arr) {
+      t.equal(arr.length, 1, 'correct put')
+      t.equal(arr[0].key, 'd', 'correct put')
+      t.equal(arr[0].value, 'Rick rolling', 'correct put')
+      lv.put('d', 'Rick Ashley', function (err) {
+        t.notOk(err)
+        lv.searchStream('rolling').toArray(function (arr) {
+          t.equal(arr.length, 0, 'correct clean up')
+          lv.searchStream('ashley').toArray(function (arr) {
+            t.equal(arr.length, 1, 'correct upsert')
+            t.equal(arr[0].key, 'd', 'correct upsert')
+            t.equal(arr[0].value, 'Rick Ashley', 'correct upsert')
 
-          lv.del('a')
-          lv.del('b')
-          lv.del('c')
-          lv.del('d', function (err) {
-            t.notOk(err)
-            lv.meta.get('size', function (err, size) {
-              t.notOk(err && !err.notFound)
-              t.notOk(size, 'empty after delete all')
-              t.end()
+            lv.del('a')
+            lv.del('b')
+            lv.del('c')
+            lv.del('d', function (err) {
+              t.notOk(err)
+              lv.meta.get('size', function (err, size) {
+                t.notOk(err && !err.notFound)
+                t.notOk(size, 'empty after delete all')
+                t.end()
+              })
             })
           })
         })
@@ -111,8 +116,8 @@ test('CRUD', function (t) {
   })
 })
 
-test('Search', function (t) {
-  t.plan(11)
+test('Search options', function (t) {
+  t.plan(12)
 
   var live = lv.liveStream('green plant')
 
@@ -146,6 +151,10 @@ test('Search', function (t) {
 
       lv.searchStream(['green', 'plant']).toArray(function (arr2) {
         t.deepEqual(arr2, arr, 'tokenized query')
+      })
+
+      lv.searchStream('green plant', { values: false }).toArray(function (arr) {
+        t.notOk(arr[0].value, 'b', 'values: false')
       })
 
       lv.searchStream('green plant', { offset: 1 }).toArray(function (arr2) {
