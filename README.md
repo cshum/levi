@@ -123,7 +123,7 @@ result is of form
 ### .liveStream(query, [options])
 
 Approximate relevancy score as soon as documents being indexed. 
-A non-ending [highland](http://highlandjs.org/) object stream.
+A never-ending [highland](http://highlandjs.org/) object stream.
 
 This should be used only when having sufficiently large amount of indexed documents, as relevancy score may be fluctuating at the beginning.
 But very preferable for large amount of live streaming data since `liveStream()` requires almost no database scans, which means significantly faster processing.
