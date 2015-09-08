@@ -54,8 +54,7 @@ test('similarity', function (t) {
 
 test('CRUD', function (t) {
   var aObj = {
-    a: 'hello world',
-    b: 'world sucks'
+    a: 'hello world'
   }
   lv.put('a', aObj, function () {
     lv.get('a', function (err, value) {
