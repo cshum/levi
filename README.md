@@ -10,7 +10,7 @@ npm install levi
 
 Full-text search using TF-IDF and cosine similarity. 
 Stream based query mechanism plus query-time field boost options. 
-Provided with configurable text processing pipeline: Tokenizer, Stemmer, and Stopwords filter.
+Provided with configurable text processing pipeline: Tokenizer, Porter Stemmer and Stopwords filter.
 
 Levi is built on [LevelUP](https://github.com/Level/levelup) - a fast, asynchronous, 
 [transactional](https://github.com/cshum/level-transactions/) storage interface.
@@ -19,14 +19,14 @@ Also works with a variety of LevelDOWN compatible backends.
 
 In addition, Levi provides relevancy scoring for live changing data using [TF-ICF](http://cda.ornl.gov/publications/ICMLA06.pdf) - a TF-IDF approximation based on existing corpus.
 Such scoring matches comparably close to TF-IDF when existing corpus is sufficiently large,
-and with significantly better performance O(N) instead of O(N^2).
+with significantly better performance O(N) instead of O(N^2).
 
 ## API
 
 ### levi(path, [options])
 ### levi(sublevel, [options])
 
-Create a new Levi instance with [LevelUP](https://github.com/Level/levelup#ctor) database path.
+Create a new Levi instance with [LevelUP](https://github.com/Level/levelup#ctor) database path,
 
 ```js
 var levi = require('levi')
