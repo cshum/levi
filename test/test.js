@@ -153,7 +153,7 @@ test('Search options', function (t) {
       })
 
       lv.searchStream('green plant', { values: false }).toArray(function (arr) {
-        t.notOk(arr[0].value, 'b', 'values: false')
+        t.notOk(arr[0].value, 'values: false')
       })
 
       lv.searchStream('green plant', { offset: 1 }).toArray(function (arr2) {
