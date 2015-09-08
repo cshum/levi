@@ -52,7 +52,7 @@ test('similarity', function (t) {
   t.end()
 })
 
-test('put', function (t) {
+test('CRUD', function (t) {
   var aObj = {
     a: 'hello world',
     b: 'world sucks'
@@ -79,24 +79,35 @@ test('put', function (t) {
       lv.meta.get('size', function (err, size) {
         t.notOk(err)
         t.equal(size, 3, 'size correct')
-        lv.searchStream('aldus pagemaker').toArray(function (arr) {
-          t.equal(arr[0].key, 'c', 'text searchable')
-          t.end()
-        })
       })
     })
   })
-})
 
-test('del', function (t) {
-  lv.del('a')
-  lv.del('b')
-  lv.del('c', function (err) {
+  lv.put('d', 'Rick rolling', function (err) {
     t.notOk(err)
-    lv.meta.get('size', function (err, size) {
-      t.notOk(err && !err.notFound)
-      t.notOk(size, 'empty after delete all')
-      t.end()
+    lv.put('d', 'Rick Ashley', function (err) {
+      t.notOk(err)
+      lv.searchStream('rolling').toArray(function (arr) {
+        t.equal(arr.length, 0, 'correct clean up')
+        lv.searchStream('ashley').toArray(function (arr) {
+          t.equal(arr.length, 1, 'correct upsert')
+          t.equal(arr[0].key, 'd', 'correct upsert')
+          t.equal(arr[0].value, 'Rick Ashley', 'correct upsert')
+
+          lv.del('a')
+          lv.del('b')
+          lv.del('c')
+          lv.del('d', function (err) {
+            t.notOk(err)
+            lv.meta.get('size', function (err, size) {
+              t.notOk(err && !err.notFound)
+              t.notOk(size, 'empty after delete all')
+              t.end()
+            })
+          })
+
+        })
+      })
     })
   })
 })
