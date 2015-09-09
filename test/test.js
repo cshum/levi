@@ -21,7 +21,9 @@ test('pipeline', function (t) {
   t.plan(4)
   lv.pipeline('including a foo bar of __proto__ constructor.', function (err, tokens) {
     t.notOk(err)
-    t.deepEqual(tokens, ['@includ', '@foo', '@bar', '@__proto__', '@constructor'])
+    t.deepEqual(tokens, [
+      '@includ', '@foo', '@bar', '@__proto__', '@constructor'
+    ], 'stemmer, stopwords, js reserved words')
   })
   lv.pipeline({
     a: 'foo bar',
@@ -31,7 +33,9 @@ test('pipeline', function (t) {
     f: null
   }, function (err, tokens) {
     t.notOk(err)
-    t.deepEqual(tokens, ['@foo', '@bar', '@hello', '@world'])
+    t.deepEqual(tokens, [
+      '@foo', '@bar', '@hello', '@world'
+    ], 'text extraction from object')
   })
 })
 
