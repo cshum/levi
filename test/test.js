@@ -9,7 +9,7 @@ var test = require('tape')
 var levi = require('../')
 var similarity = require('../lib/util/similarity')
 var group = require('../lib/util/group')
-var jsondown = require('jsondown')
+// var jsondown = require('jsondown')
 var H = require('highland')
 
 var lv = levi('./test/db')
