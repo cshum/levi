@@ -12,7 +12,7 @@ var group = require('../lib/util/group')
 var jsondown = require('jsondown')
 var H = require('highland')
 
-var lv = levi('./test/db', {db: jsondown})
+var lv = levi('./test/db')
 .use(levi.tokenizer())
 .use(levi.stemmer())
 .use(levi.stopword())
