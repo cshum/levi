@@ -27,25 +27,13 @@ with significantly better performance O(N) instead of O(N^2).
 ### levi(sublevel, [options])
 
 Create a new Levi instance with [LevelUP](https://github.com/Level/levelup#ctor) database path,
+or a section of [SublevelUP](https://github.com/cshum/sublevelup).
 
 ```js
 var levi = require('levi')
 
-// passing db location
+// levi instance of database path `db`
 var lv = levi('db') 
-.use(levi.tokenizer())
-.use(levi.stemmer())
-.use(levi.stopword())
-
-```
-alternatively passing a section of [SublevelUP](https://github.com/cshum/sublevelup).
-
-```js
-var sublevel = require('sublevelup')
-var db = sublevel(levelup('db'))
-
-// passing db section `search`
-var lv = levi(db.sublevel('search'))
 .use(levi.tokenizer())
 .use(levi.stemmer())
 .use(levi.stopword())
