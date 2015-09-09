@@ -18,10 +18,20 @@ var lv = levi('./test/db', {db: jsondown})
 .use(levi.stopword())
 
 test('pipeline', function (t) {
+  t.plan(4)
   lv.pipeline('including a foo bar of __proto__ constructor.', function (err, tokens) {
     t.notOk(err)
     t.deepEqual(tokens, ['@includ', '@foo', '@bar', '@__proto__', '@constructor'])
-    t.end()
+  })
+  lv.pipeline({
+    a: 'foo bar',
+    c: ['hello'],
+    d: { asdf: { ghjk: 'world' } },
+    e: 167,
+    f: null
+  }, function (err, tokens) {
+    t.notOk(err)
+    t.deepEqual(tokens, ['@foo', '@bar', '@hello', '@world'])
   })
 })
 
