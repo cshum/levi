@@ -130,11 +130,10 @@ test('CRUD', function (t) {
 })
 
 test('Search options', function (t) {
-  t.plan(12)
+  t.plan(13)
 
   var live = lv.liveStream('green plant')
-
-  H([{
+  var list = [{
     id: 'a',
     title: 'Mr. Green kills Colonel Mustard',
     body: 'Mr. Green killed Colonel Mustard in the study with the candlestick. ' +
@@ -152,12 +151,17 @@ test('Search options', function (t) {
     id: 'd',
     title: 'foo',
     body: 'bar'
-  }])
+  }]
+
+  H(list)
   .map(H.wrapCallback(function (doc, cb) {
     lv.put(doc.id, doc, cb)
   }))
   .series()
   .done(function () {
+    lv.readStream({gt: 'a'}).pluck('value').toArray(function (arr) {
+      t.deepEqual(arr, list.slice(1), 'readStream')
+    })
     lv.searchStream('green plant').toArray(function (arr) {
       t.equal(arr.length, 3, 'search: correct number of results')
       t.equal(arr[0].key, 'b', 'search: correct score')

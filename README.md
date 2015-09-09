@@ -64,7 +64,11 @@ lv.put('b', {
 Delete document `key` from index.
 
 ### .get(key, [options], [callback])
-Fetch value from the store. Behaves exactly like LevelUP's [`get()`](https://github.com/Level/levelup#get)
+Fetch value from the store. Works exactly like LevelUP's [`get()`](https://github.com/Level/levelup#get)
+
+### .readStream([options])
+Obtain a ReadStream of documents, lexicographically sorted by key.
+Works exactly like LevelUP's [`readStream()`](https://github.com/Level/levelup#dbcreatereadstreamoptions)
 
 ### .searchStream(query, [options])
 The main search interface of Levi is a Node compatible [highland](http://highlandjs.org/) object stream.
