@@ -20,13 +20,13 @@
     "beefy": "^2.1.5",
     "browserify": "^10.2.6",
     "bundle-collapser": "^1.2.0",
-    "jsondown": "^0.1.1",
     "derequire": "^2.0.0",
     "indexeddbshim": "^2.0.1",
+    "jsondown": "^0.1.1",
     "rimraf": "^2.4.2",
-    "uglify-js": "^2.4.23",
     "standard": "^5.1.0",
-    "tape": "^4.1.0"
+    "tape": "^4.1.0",
+    "uglify-js": "^2.4.23"
   },
   "repository": {
     "type": "git",

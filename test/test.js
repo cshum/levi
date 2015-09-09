@@ -9,18 +9,18 @@ var test = require('tape')
 var levi = require('../')
 var similarity = require('../lib/util/similarity')
 var group = require('../lib/util/group')
-
+var jsondown = require('jsondown')
 var H = require('highland')
 
-var lv = levi('./test/db')
+var lv = levi('./test/db', {db: jsondown})
 .use(levi.tokenizer())
 .use(levi.stemmer())
 .use(levi.stopword())
 
 test('pipeline', function (t) {
-  lv.pipeline('Aldus PageMaker including versions of Lorem Ipsum.', function (err, tokens) {
+  lv.pipeline('including a foo bar of __proto__ constructor.', function (err, tokens) {
     t.notOk(err)
-    t.deepEqual(tokens, ['aldu', 'pagemak', 'includ', 'version', 'lorem', 'ipsum'])
+    t.deepEqual(tokens, ['@includ', '@foo', '@bar', '@__proto__', '@constructor'])
     t.end()
   })
 })
