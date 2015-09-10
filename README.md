@@ -72,7 +72,7 @@ Works exactly like LevelUP's [`readStream()`](https://github.com/Level/levelup#d
 
 ### .searchStream(query, [options])
 The main search interface of Levi is a Node compatible [highland](http://highlandjs.org/) object stream.
-`query` can be a string or object fields.
+`query` can be a string or object fields. 
 
 Accepts following `options`:
 * `fields` object, default scoring every fields by default. Set fields for controlling relevancy by
@@ -81,6 +81,8 @@ Accepts following `options`:
 * `values` boolean, default true. Set to false to omit attaching document value for faster query performance.
 * `offset` number, offset results. Default 0.
 * `limit` number, limit number of results. Default infinity.
+
+A "more like this" query can be done by searching the document itself.
 
 ```js
 lv.searchStream('lorem ipsum').toArray(function (results) { ... }) // highland method
