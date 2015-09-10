@@ -84,6 +84,15 @@ test('CRUD', function (t) {
       t.deepEqual(value, aObj, 'put object')
     })
   })
+
+  var ar = ['hello', 'printing', 'a']
+  lv.put('ar', ar, function () {
+    lv.get('ar', function (err, value) {
+      t.notOk(err)
+      t.deepEqual(value, ar, 'put array')
+    })
+  })
+
   var bText = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'
   lv.put('b', new Buffer(bText), function () {
     lv.get('b', function (err, value) {
@@ -92,6 +101,7 @@ test('CRUD', function (t) {
       t.equal(typeof value, 'string', 'buffer converted to string')
     })
   })
+
   var cText = 'Aldus PageMaker including versions of Lorem Ipsum.'
   lv.put('c', cText, function () {
     lv.get('c', function (err, value) {
@@ -99,7 +109,7 @@ test('CRUD', function (t) {
       t.equal(value, cText, 'put string')
       lv.meta.get('size', function (err, size) {
         t.notOk(err)
-        t.equal(size, 3, 'size correct')
+        t.equal(size, 4, 'size correct')
       })
     })
   })
@@ -120,6 +130,7 @@ test('CRUD', function (t) {
             t.equal(arr[0].value, 'Rick Ashley', 'correct upsert')
 
             lv.del('a')
+            lv.del('ar')
             lv.del('b')
             lv.del('c')
             lv.del('d', function (err) {
@@ -138,7 +149,7 @@ test('CRUD', function (t) {
 })
 
 test('Search options', function (t) {
-  t.plan(13)
+  t.plan(15)
 
   var live = lv.liveStream('green plant')
   var list = [{
@@ -170,6 +181,15 @@ test('Search options', function (t) {
     lv.readStream({gt: 'a'}).pluck('value').toArray(function (arr) {
       t.deepEqual(arr, list.slice(1), 'readStream')
     })
+
+    lv.searchStream({
+      title: 'Professor Plumb loves plant',
+      message: 'He has a green plant in his study'
+    }).pluck('key').toArray(function (arr) {
+      t.equal(arr.length, 3, 'object search: correct number of results')
+      t.deepEqual(arr, ['b', 'c', 'a'], 'object search: correct order')
+    })
+
     lv.searchStream('green plant').toArray(function (arr) {
       t.equal(arr.length, 3, 'search: correct number of results')
       t.equal(arr[0].key, 'b', 'search: correct score')
