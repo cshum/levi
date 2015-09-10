@@ -82,7 +82,7 @@ Accepts following `options`:
 * `offset` number, offset results. Default 0.
 * `limit` number, limit number of results. Default infinity.
 
-A "more like this" query can be done by searching the document itself.
+A "more like this" query can be done by searching with document itself.
 
 ```js
 lv.searchStream('lorem ipsum').toArray(function (results) { ... }) // highland method
@@ -96,7 +96,7 @@ lv.searchStream('lorem ipusm', {
   values: false // omit value
 }).pipe(...)
 
-// search with object
+// document as query
 lv.searchStream({ 
   title: 'Lorem Ipsum',
   body: 'Dummy text of the printing and typesetting industry.'
