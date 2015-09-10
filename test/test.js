@@ -18,13 +18,15 @@ var lv = levi('./test/db')
 .use(levi.stopword())
 
 test('pipeline', function (t) {
-  t.plan(4)
+  t.plan(5)
+
   lv.pipeline('including a foo bar of __proto__ constructor.', function (err, tokens) {
     t.notOk(err)
     t.deepEqual(tokens, [
       '@includ', '@foo', '@bar', '@__proto__', '@constructor'
     ], 'stemmer, stopwords, js reserved words')
   })
+
   lv.pipeline({
     a: 'foo bar',
     c: ['hello'],
@@ -36,6 +38,12 @@ test('pipeline', function (t) {
     t.deepEqual(tokens, [
       '@foo', '@bar', '@hello', '@world'
     ], 'text extraction from object')
+  })
+
+  var cyclic = { a: 'foo', b: { asdf: 'bar' } }
+  cyclic.b.boom = cyclic
+  lv.pipeline(cyclic, function (err) {
+    t.equal(err.message, 'Cycle detected')
   })
 })
 
