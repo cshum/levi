@@ -149,9 +149,15 @@ test('CRUD', function (t) {
 })
 
 test('Search options', function (t) {
-  t.plan(15)
+  t.plan(19)
 
   var live = lv.liveStream('green plant')
+  var live2 = lv.searchStream('watering plant', { fields: { title: 1, body: 10 } })
+  var live3 = lv.searchStream({
+    title: 'Professor Plumb loves plant',
+    message: 'He has a green plant in his study'
+  })
+
   var list = [{
     id: 'a',
     title: 'Mr. Green kills Colonel Mustard',
@@ -180,14 +186,6 @@ test('Search options', function (t) {
   .done(function () {
     lv.readStream({gt: 'a'}).pluck('value').toArray(function (arr) {
       t.deepEqual(arr, list.slice(1), 'readStream')
-    })
-
-    lv.searchStream({
-      title: 'Professor Plumb loves plant',
-      message: 'He has a green plant in his study'
-    }).pluck('key').toArray(function (arr) {
-      t.equal(arr.length, 3, 'object search: correct number of results')
-      t.deepEqual(arr, ['b', 'c', 'a'], 'object search: correct order')
     })
 
     lv.searchStream('green plant').toArray(function (arr) {
@@ -225,6 +223,27 @@ test('Search options', function (t) {
     lv.searchStream('watering plant', { fields: { title: 1, body: 10 } }).toArray(function (arr) {
       t.equal(arr.length, 2, 'field boosting: correct number of results')
       t.equal(arr[0].key, 'c', 'field boosting: correct boosted result')
+
+      live2.take(2).last().pull(function (err, res) {
+        t.notOk(err)
+        t.equal(res.score, arr[1].score,
+          'live: last score identical to search score')
+      })
+    })
+
+    lv.searchStream({
+      title: 'Professor Plumb loves plant',
+      message: 'He has a green plant in his study'
+    }).toArray(function (arr) {
+      t.equal(arr.length, 3, 'object search: correct number of results')
+      H(arr).pluck('key').toArray(function (arr) {
+        t.deepEqual(arr, ['b', 'c', 'a'], 'object search: correct order')
+      })
+      live3.take(3).last().pull(function (err, res) {
+        t.notOk(err)
+        t.equal(res.score, arr[2].score,
+          'live: last score identical to search score')
+      })
     })
   })
 })
