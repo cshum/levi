@@ -20,7 +20,7 @@ var lv = levi('./test/db')
 test('pipeline', function (t) {
   t.plan(5)
 
-  lv.pipeline('including a foo !a!b#c! of instanceof constructor.', function (err, tokens) {
+  lv.pipeline('including a foo !a!b!c! of instanceof constructor.', function (err, tokens) {
     t.notOk(err)
     t.deepEqual(tokens, [
       '@includ', '@foo', '@abc', '@instanceof', '@constructor'
