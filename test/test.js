@@ -107,10 +107,6 @@ test('CRUD', function (t) {
     lv.get('c', function (err, value) {
       t.notOk(err)
       t.equal(value, cText, 'put string')
-      lv.meta.get('size', function (err, size) {
-        t.notOk(err)
-        t.equal(size, 4, 'size correct')
-      })
     })
   })
 
@@ -129,18 +125,24 @@ test('CRUD', function (t) {
             t.equal(arr[0].key, 'd', 'correct upsert')
             t.equal(arr[0].value, 'Rick Ashley', 'correct upsert')
 
-            lv.del('a')
-            lv.del('ar')
-            lv.del('b')
-            lv.del('c')
-            lv.del('d', function (err) {
+            lv.meta.get('size', function (err, size) {
               t.notOk(err)
-              lv.meta.get('size', function (err, size) {
-                t.notOk(err && !err.notFound)
-                t.notOk(size, 'empty after delete all')
-                t.end()
+              t.equal(size, 5, 'size correct')
+
+              lv.del('a')
+              lv.del('ar')
+              lv.del('b')
+              lv.del('c')
+              lv.del('d', function (err) {
+                t.notOk(err)
+                lv.meta.get('size', function (err, size) {
+                  t.notOk(err && !err.notFound)
+                  t.notOk(size, 'empty after delete all')
+                  t.end()
+                })
               })
             })
+
           })
         })
       })
