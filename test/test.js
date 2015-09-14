@@ -150,7 +150,7 @@ test('CRUD', function (t) {
 })
 
 test('Search options', function (t) {
-  t.plan(19)
+  t.plan(21)
 
   var live = lv.liveStream('green plant')
   var live2 = lv.searchStream('watering plant', { fields: { title: 1, body: 10 } })
@@ -214,6 +214,11 @@ test('Search options', function (t) {
         t.equal(res.score, arr[2].score,
           'live: last score identical to search score')
       })
+    })
+
+    lv.searchStream('green plant', { gt: 'b' }).toArray(function (arr) {
+      t.equal(arr.length, 1, 'gt correct # of result')
+      t.equal(arr[0].key, 'c', 'gt correct first result')
     })
 
     lv.searchStream('green', { fields: { title: true } }).toArray(function (arr) {

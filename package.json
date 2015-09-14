@@ -11,6 +11,7 @@
     "level-transactions": "^1.4.0",
     "leveldown": "^1.4.1",
     "levelup": "^1.2.1",
+    "ltgt": "^2.1.2",
     "porter-stemmer": "^0.9.1",
     "stream-iterate": "^1.1.1",
     "sublevelup": "^3.1.0",
