@@ -98,6 +98,12 @@ lv.searchStream('lorem ipusm', {
   values: false // omit value
 }).pipe(...)
 
+// ltgt
+lv.searchStream('lorem ipusm', {
+  gt: '!posts!',
+  lt: '!posts!~'
+}).pipe(...)
+
 // document as query
 lv.searchStream({ 
   title: 'Lorem Ipsum',
