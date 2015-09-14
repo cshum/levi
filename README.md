@@ -134,6 +134,14 @@ A never-ending [highland](http://highlandjs.org/) object stream.
 This should be used only when having sufficiently large amount of indexed documents, as relevancy score may be fluctuating at the beginning.
 But very preferable for large amount of live streaming data since `liveStream()` requires almost no database scans, which means significantly faster processing.
 
+### levi.destroy(path, [callback])
+
+Completely remove an existing database at `path`, 
+which deletes the database directory on Node.js
+or deletes the IndexedDB database on browser.
+
+If you are using a custom `options.db` backend, you need to invoke its corresponding `destroy()` function to remove database properly.
+
 ## License
 
 MIT
