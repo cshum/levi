@@ -8,7 +8,7 @@
     "ginga": "^1.1.1",
     "highland": "^2.5.1",
     "level-js": "^2.2.1",
-    "level-transactions": "^1.4.0",
+    "level-transactions": "^1.4.3",
     "leveldown": "^1.4.1",
     "levelup": "^1.2.1",
     "ltgt": "^2.1.2",
