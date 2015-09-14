@@ -150,11 +150,12 @@ test('CRUD', function (t) {
 })
 
 test('Search options', function (t) {
-  t.plan(23)
+  t.plan(27)
 
   var live = lv.liveStream('green plant')
   var liveGt = lv.liveStream('green plant', { gt: 'b' })
   var live2 = lv.searchStream('watering plant', { fields: { title: 1, body: 10 } })
+  var live2Lt = lv.liveStream('watering plant', { fields: { title: 1, body: 10 }, lt: 'c' })
   var live3 = lv.searchStream({
     title: 'Professor Plumb loves plant',
     message: 'He has a green plant in his study'
@@ -239,6 +240,17 @@ test('Search options', function (t) {
         t.notOk(err)
         t.equal(res.score, arr[1].score,
           'live: last score identical to search score')
+      })
+    })
+
+    lv.searchStream('watering plant', { fields: { title: 1, body: 10 }, lt: 'c' }).toArray(function (arr) {
+      t.equal(arr.length, 1, 'upper bound: correct number of results')
+      t.equal(arr[0].key, 'b', 'upper bound: correct boosted result')
+
+      live2Lt.take(1).last().pull(function (err, res) {
+        t.notOk(err)
+        t.equal(res.score, arr[0].score,
+          'upper bound: last score identical to search score')
       })
     })
 
