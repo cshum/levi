@@ -12,19 +12,25 @@ var group = require('../lib/util/group')
 // var jsondown = require('jsondown')
 var H = require('highland')
 
-var lv = levi('./test/db')
+var lv = levi('./test/db', {
+  // db: jsondown
+})
 .use(levi.tokenizer())
 .use(levi.stemmer())
 .use(levi.stopword())
 
 test('pipeline', function (t) {
-  t.plan(5)
+  t.plan(7)
 
   lv.pipeline('including a foo !a!b!c! of instanceof constructor.', function (err, tokens) {
     t.notOk(err)
     t.deepEqual(tokens, [
-      '@includ', '@foo', '@abc', '@instanceof', '@constructor'
+      'includ', 'foo', 'abc', 'instanceof', 'constructor'
     ], 'stemmer, stopwords, js reserved words')
+    lv.pipeline(tokens, function (err, tokens2) {
+      t.notOk(err)
+      t.deepEqual(tokens, tokens2, 'idempotent')
+    })
   })
 
   lv.pipeline({
@@ -36,7 +42,7 @@ test('pipeline', function (t) {
   }, function (err, tokens) {
     t.notOk(err)
     t.deepEqual(tokens, [
-      '@foo', '@bar', '@hello', '@world'
+      'foo', 'bar', 'hello', 'world'
     ], 'text extraction from object')
   })
 
