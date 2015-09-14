@@ -1,9 +1,3 @@
-if (!process.browser) {
-  require('rimraf').sync('./test/db')
-} else {
-  require('level-js').destroy('./test/db', function () {})
-}
-
 var test = require('tape')
 
 var levi = require('../')
@@ -11,12 +5,19 @@ var similarity = require('../lib/util/similarity')
 var group = require('../lib/util/group')
 var H = require('highland')
 
-var lv = levi('./test/db', {
-  // db: require('jsondown')
+var lv
+test('clean up', function (t) {
+  levi.destroy('./test/db', function (err) {
+    t.notOk(err, 'destroy')
+
+    lv = levi('./test/db')
+    .use(levi.tokenizer())
+    .use(levi.stemmer())
+    .use(levi.stopword())
+
+    t.end()
+  })
 })
-.use(levi.tokenizer())
-.use(levi.stemmer())
-.use(levi.stopword())
 
 test('pipeline', function (t) {
   t.plan(7)
