@@ -128,11 +128,6 @@ result is of form
 }
 ```
 
-### .scoreStream(query, [options])
-
-The underlying scoring mechanism of `searchStream()`. 
-A highland object stream that calculates relevancy score against `query`, lexicographically sorted by key.
-
 ### .liveStream(query, [options])
 
 Approximate relevancy score as soon as documents being indexed. 
@@ -140,6 +135,25 @@ A never-ending [highland](http://highlandjs.org/) object stream.
 
 This should be used only when having sufficiently large amount of indexed documents, as relevancy score may be fluctuating at the beginning.
 But very preferable for large amount of live streaming data since `liveStream()` requires almost no database scans, which means significantly faster processing.
+
+### .scoreStream(query, [options])
+
+Underlying scoring mechanism of `searchStream()`. 
+A highland object stream that calculates relevancy score against `query`, lexicographically sorted by key.
+
+### .pipeline(obj, callback)
+
+Text processing pipeline for index and query, which extracts text data from a serializable `value` object into tokens.
+
+```js
+lv.pipeline([
+  'lorem ipsum is dummy text', 
+  {foo: 'hello', bar: 'printing'}
+], function (err, tokens) {
+  // tokens
+  [ 'lorem', 'ipsum', 'dummi', 'text', 'hello', 'print' ]
+})
+```
 
 ### levi.destroy(path, [callback])
 
