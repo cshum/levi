@@ -141,7 +141,7 @@ But very preferable for large amount of live streaming data since `liveStream()`
 Underlying scoring mechanism of `searchStream()`. 
 A highland object stream that calculates relevancy score against `query`, lexicographically sorted by key.
 
-### .pipeline(obj, callback)
+### .pipeline(value, callback)
 
 Text processing pipeline for index and query, which extracts text data from a serializable `value` object into tokens.
 
