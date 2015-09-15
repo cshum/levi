@@ -21,6 +21,8 @@ In addition, Levi provides relevancy scoring for live changing data using [TF-IC
 Such scoring matches comparably close to TF-IDF when existing corpus is sufficiently large,
 with significantly better performance O(N) instead of O(N^2).
 
+[Chinese language plugins](https://github.com/cshum/levi-chinese)
+
 ## API
 
 ### levi(path, [options])
