@@ -126,6 +126,11 @@ result is of form
 }
 ```
 
+### .scoreStream(query, [options])
+
+The underlying scoring mechanism of `searchStream()`. 
+A highland object stream that calculates relevancy score against `query`, lexicographically sorted by key.
+
 ### .liveStream(query, [options])
 
 Approximate relevancy score as soon as documents being indexed. 
