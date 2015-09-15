@@ -1,6 +1,6 @@
 # Levi
 
-Streaming full-text search for Node.js and browsers. Using LevelDB as storage backend.
+Streaming full-text search for Node.js and browsers. Uses LevelDB as storage backend.
 
 [![Build Status](https://travis-ci.org/cshum/levi.svg?branch=master)](https://travis-ci.org/cshum/levi)
 
@@ -21,7 +21,7 @@ In addition, Levi provides relevancy scoring for live changing data using [TF-IC
 Such scoring matches comparably close to TF-IDF when existing corpus is sufficiently large,
 with significantly better performance O(N) instead of O(N^2).
 
-[Chinese language plugins](https://github.com/cshum/levi-chinese)
+[Chinese support](https://github.com/cshum/levi-chinese)
 
 ## API
 
@@ -147,7 +147,7 @@ Completely remove an existing database at `path`,
 which deletes the database directory on Node.js
 or deletes the IndexedDB database on browser.
 
-If you are using a custom `options.db` backend, you need to invoke its corresponding `destroy()` function to remove database properly.
+If you are using a custom Level backend, you need to invoke its corresponding `destroy()` function to remove database properly.
 
 ## License
 
