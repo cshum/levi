@@ -76,7 +76,7 @@ Works exactly like LevelUP's [`readStream()`](https://github.com/Level/levelup#d
 The main search interface of Levi is a Node compatible [highland](http://highlandjs.org/) object stream.
 `query` can be a string or object fields. 
 
-Accepts following `options`:
+Accepts following options:
 * `fields` object, default scoring every fields by default. Set fields for controlling relevancy by
   * `'*': true`: * any fields, true is identical to 1
   * `field: boost`: number for multiplying scoring factor of a field.
@@ -132,6 +132,8 @@ result is of form
 
 Underlying scoring mechanism of `searchStream()`. 
 A highland object stream that calculates relevancy score against `query`, lexicographically sorted by key.
+
+Accepts options `fields`, `gt`, `gte`, `lt`, `lte`.
 
 ### .liveStream(query, [options])
 
