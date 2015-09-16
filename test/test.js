@@ -156,7 +156,7 @@ test('CRUD', function (t) {
 })
 
 test('Search options', function (t) {
-  t.plan(27)
+  t.plan(28)
 
   var live = lv.liveStream('green plant')
   var liveGt = lv.liveStream('green plant', { gt: 'b' })
@@ -222,6 +222,10 @@ test('Search options', function (t) {
         t.equal(res.score, arr[2].score,
           'live: last score identical to search score')
       })
+    })
+
+    lv.scoreStream('green plant').pluck('key').toArray(function (arr) {
+      t.deepEqual(arr, ['a', 'b', 'c'], 'scoreStream')
     })
 
     lv.searchStream('green plant', { gt: 'b' }).toArray(function (arr) {

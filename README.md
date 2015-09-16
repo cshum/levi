@@ -1,6 +1,6 @@
 # Levi
 
-Streaming full-text search for Node.js and browsers. Uses LevelDB as storage backend.
+Streaming full-text search for Node.js and browsers. Using LevelDB as storage backend.
 
 [![Build Status](https://travis-ci.org/cshum/levi.svg?branch=master)](https://travis-ci.org/cshum/levi)
 
@@ -128,6 +128,11 @@ result is of form
 }
 ```
 
+### .scoreStream(query, [options])
+
+Underlying scoring mechanism of `searchStream()`. 
+A highland object stream that calculates relevancy score against `query`, lexicographically sorted by key.
+
 ### .liveStream(query, [options])
 
 Approximate relevancy score as soon as documents being indexed. 
@@ -135,11 +140,6 @@ A never-ending [highland](http://highlandjs.org/) object stream.
 
 This should be used only when having sufficiently large amount of indexed documents, as relevancy score may be fluctuating at the beginning.
 But very preferable for large amount of live streaming data since `liveStream()` requires almost no database scans, which means significantly faster processing.
-
-### .scoreStream(query, [options])
-
-Underlying scoring mechanism of `searchStream()`. 
-A highland object stream that calculates relevancy score against `query`, lexicographically sorted by key.
 
 ### .pipeline(value, callback)
 
