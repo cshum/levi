@@ -2,7 +2,6 @@ var test = require('tape')
 
 var levi = require('../')
 var similarity = require('../lib/util/similarity')
-var group = require('../lib/util/group')
 var H = require('highland')
 
 var lv
@@ -50,19 +49,6 @@ test('pipeline', function (t) {
   cyclic.b.boom = cyclic
   lv.pipeline(cyclic, function (err) {
     t.equal(err.message, 'Cycle detected')
-  })
-})
-
-test('grouping', function (t) {
-  H([{key: 1}, {key: 1}, {key: 2}, {key: 3}, {key: 3}])
-  .through(group)
-  .toArray(function (arr) {
-    t.deepEqual(arr, [
-      [ { key: 1 }, { key: 1 } ],
-      [ { key: 2 } ],
-      [ { key: 3 }, { key: 3 } ]
-    ], 'grouping')
-    t.end()
   })
 })
 
