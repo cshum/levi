@@ -5,6 +5,7 @@
   "author": "Adrian C Shum <adrian@cshum.com> (https://github.com/cshum)",
   "main": "lib/levi.js",
   "dependencies": {
+    "extract-object": "^1.0.0",
     "ginga": "^1.1.1",
     "group-stream": "^1.0.1",
     "highland": "^2.5.1",
