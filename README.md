@@ -26,7 +26,7 @@ with significantly better performance O(N) instead of O(N^2).
 ## API
 
 ### levi(path, [options])
-### levi(levelup, [options])
+### levi(db, [options])
 
 Create a new Levi instance with [LevelUP](https://github.com/Level/levelup#ctor) database path, instance,
 or a section of [SublevelUP](https://github.com/cshum/sublevelup).
