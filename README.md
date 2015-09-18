@@ -68,6 +68,17 @@ Delete document `key` from index.
 ### .get(key, [options], [callback])
 Fetch value from the store. Works exactly like LevelUP's [`get()`](https://github.com/Level/levelup#get)
 
+### .batch(array, [options], [callback])
+Atomic bulk-write operations put and del, 
+similar to LevelUP's array form of [`batch()`](https://github.com/Level/levelup#batch)
+
+```js
+lv.batch([
+  { type: 'put', key: 'a', value: 'Lorem Ipsum is simply dummy text.' },
+  { type: 'del', key: 'b' }
+], function (err) { ... })
+```
+
 ### .readStream([options])
 Obtain a ReadStream of documents, lexicographically sorted by key.
 Works exactly like LevelUP's [`readStream()`](https://github.com/Level/levelup#dbcreatereadstreamoptions)
