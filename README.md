@@ -28,8 +28,8 @@ with significantly better performance O(N) instead of O(N^2).
 ### levi(path, [options])
 ### levi(db, [options])
 
-Create a new Levi instance with [LevelUP](https://github.com/Level/levelup#ctor) database path, instance,
-or a section of [SublevelUP](https://github.com/cshum/sublevelup).
+Create a new Levi instance with a [LevelUP](https://github.com/Level/levelup#ctor) database path or instance,
+or with a [SublevelUP](https://github.com/cshum/sublevelup) section.
 
 ```js
 var levi = require('levi')
@@ -77,7 +77,7 @@ The main search interface of Levi is a Node compatible [highland](http://highlan
 `query` can be a string or object fields. 
 
 Accepts following options:
-* `fields` object, default scoring every fields by default. Set fields for controlling relevancy by
+* `fields` object, scoring every fields by default. Set fields for controlling relevancy by
   * `'*': true`: * any fields, true is identical to 1
   * `field: boost`: number for multiplying scoring factor of a field.
 * `gt` (greater than), `gte` (greater than or equal) define the lower bound of key range to be searched.
@@ -142,6 +142,8 @@ A never-ending [highland](http://highlandjs.org/) object stream.
 
 This should be used only when having sufficiently large amount of indexed documents, as relevancy score may be fluctuating at the beginning.
 But very preferable for large amount of live streaming data since `liveStream()` requires almost no database scans, which means significantly faster processing.
+
+Accepts options `fields`, `gt`, `gte`, `lt`, `lte`, `values`.
 
 ### .pipeline(value, callback)
 
