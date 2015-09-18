@@ -77,14 +77,6 @@ test('CRUD', function (t) {
     })
   })
 
-  var ar = ['hello', 'printing', 'a']
-  lv.put('ar', ar, function () {
-    lv.get('ar', function (err, value) {
-      t.notOk(err)
-      t.deepEqual(value, ar, 'put array')
-    })
-  })
-
   var bText = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'
   lv.put('b', new Buffer(bText), function () {
     lv.get('b', function (err, value) {
@@ -94,8 +86,18 @@ test('CRUD', function (t) {
     })
   })
 
+  var ar = ['hello', 'printing', 'a']
   var cText = 'Aldus PageMaker including versions of Lorem Ipsum.'
-  lv.put('c', cText, function () {
+
+  lv.batch([
+    {type: 'put', key: 'ar', value: ar},
+    {type: 'put', key: 'c', value: cText}
+  ], function (err) {
+    t.notOk(err, 'batch put')
+    lv.get('ar', function (err, value) {
+      t.notOk(err)
+      t.deepEqual(value, ar, 'put array')
+    })
     lv.get('c', function (err, value) {
       t.notOk(err)
       t.equal(value, cText, 'put string')
@@ -121,11 +123,13 @@ test('CRUD', function (t) {
               t.notOk(err)
               t.equal(size, 5, 'size correct')
 
-              lv.del('a')
-              lv.del('ar')
-              lv.del('b')
               lv.del('c')
-              lv.del('d', function (err) {
+              lv.del('d')
+              lv.batch([
+                {type: 'del', key: 'a'},
+                {type: 'del', key: 'ar'},
+                {type: 'del', key: 'b'}
+              ], function (err) {
                 t.notOk(err)
                 lv.meta.get('size', function (err, size) {
                   t.notOk(err && !err.notFound)
@@ -173,12 +177,9 @@ test('Search options', function (t) {
     body: 'bar'
   }]
 
-  H(list)
-  .map(H.wrapCallback(function (doc, cb) {
-    lv.put(doc.id, doc, cb)
-  }))
-  .series()
-  .done(function () {
+  lv.batch(list.map(function (doc) {
+    return {type: 'put', key: doc.id, value: doc}
+  }), function () {
     lv.readStream({gt: 'a'}).pluck('value').toArray(function (arr) {
       t.deepEqual(arr, list.slice(1), 'readStream')
     })
