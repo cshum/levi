@@ -172,9 +172,10 @@ test('CRUD', function (t) {
 })
 
 test('Search options', function (t) {
-  t.plan(28)
+  t.plan(29)
 
   var live = lv.liveStream('green plant')
+  var liveM = lv.liveStream('green plant asdf')
   var liveGt = lv.liveStream('green plant', { gt: 'b' })
   var live2 = lv.searchStream('watering plant', { fields: { title: 1, body: 10 } })
   var live2Lt = lv.liveStream('watering plant', { fields: { title: 1, body: 10 }, lt: 'c' })
@@ -235,6 +236,11 @@ test('Search options', function (t) {
         t.equal(res.score, arr[2].score,
           'live: last score identical to search score')
       })
+
+    })
+
+    liveM.pluck('key').take(3).toArray(function (arr) {
+      t.deepEqual(arr, ['a', 'b', 'c'], 'liveStream with missing idf')
     })
 
     lv.scoreStream('green plant').pluck('key').toArray(function (arr) {
