@@ -92,6 +92,8 @@ test('CRUD', function (t) {
   lv.batch([
     {type: 'put', key: 'ar', value: ar},
     {type: 'put', key: 'c', value: cText},
+    {type: 'del', key: 'ar'},
+    {type: 'del', key: 'c'},
     {type: 'put', key: 'ar', value: ar}, // repeated put
     {type: 'put', key: 'c', value: cText},
     {type: 'put', key: 'ar', value: ar},
@@ -144,6 +146,9 @@ test('CRUD', function (t) {
               lv.del('c')
               lv.del('d')
               lv.batch([
+                {type: 'del', key: 'a'},
+                {type: 'del', key: 'ar'},
+                {type: 'del', key: 'b'},
                 {type: 'del', key: 'a'},
                 {type: 'del', key: 'ar'},
                 {type: 'del', key: 'b'},
