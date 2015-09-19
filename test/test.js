@@ -236,7 +236,6 @@ test('Search options', function (t) {
         t.equal(res.score, arr[2].score,
           'live: last score identical to search score')
       })
-
     })
 
     liveM.pluck('key').take(3).toArray(function (arr) {
