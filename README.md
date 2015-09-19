@@ -21,8 +21,6 @@ In addition, Levi provides relevancy scoring for live changing data using [TF-IC
 Such scoring matches comparably close to TF-IDF when existing corpus is sufficiently large,
 with significantly better performance O(N) instead of O(N^2).
 
-[Chinese language support](https://github.com/cshum/levi-chinese)
-
 ## API
 
 ### levi(path, [options])
@@ -65,9 +63,6 @@ lv.put('b', {
 ### .del(key, [options], [callback])
 Delete document `key` from index.
 
-### .get(key, [options], [callback])
-Fetch value from the store. Works exactly like LevelUP's [`get()`](https://github.com/Level/levelup#get)
-
 ### .batch(array, [options], [callback])
 Atomic bulk-write operations put and del, 
 similar to LevelUP's array form of [`batch()`](https://github.com/Level/levelup#batch)
@@ -78,6 +73,9 @@ lv.batch([
   { type: 'del', key: 'b' }
 ], function (err) { ... })
 ```
+
+### .get(key, [options], [callback])
+Fetch value from the store. Works exactly like LevelUP's [`get()`](https://github.com/Level/levelup#get)
 
 ### .readStream([options])
 Obtain a ReadStream of documents, lexicographically sorted by key.
@@ -156,9 +154,9 @@ But very preferable for large amount of live streaming data since `liveStream()`
 
 Accepts options `fields`, `gt`, `gte`, `lt`, `lte`, `values`.
 
-### .pipeline(value, callback)
+### .pipeline(obj, callback)
 
-Text processing pipeline for index and query, which extracts text data from a serializable `value` object into tokens.
+Underlying text processing pipeline of index and query, which extracts text data from a serializable `obj` object into tokens.
 
 ```js
 lv.pipeline([
