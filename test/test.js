@@ -91,6 +91,10 @@ test('CRUD', function (t) {
 
   lv.batch([
     {type: 'put', key: 'ar', value: ar},
+    {type: 'put', key: 'c', value: cText},
+    {type: 'put', key: 'ar', value: ar}, // repeated put
+    {type: 'put', key: 'c', value: cText},
+    {type: 'put', key: 'ar', value: ar},
     {type: 'put', key: 'c', value: cText}
   ], function (err) {
     t.notOk(err, 'batch put')
@@ -106,12 +110,12 @@ test('CRUD', function (t) {
 
   for (var i = 0; i < 10; i++) {
     lv.batch([
-      {type: 'put', key: '167', value: 'on99'},
+      {type: 'put', key: 'on99' + i, value: 'on99'},
       {type: 'put', key: 'abc'}, // error
       {type: 'del', key: '168'}
     ], function (err) {
       t.ok(err)
-      lv.get('167', function (err, val) {
+      lv.get('on99' + i, function (err, val) {
         t.notOk(val, 'err not comitted')
         t.ok(err.notFound, 'err not comitted')
       })
@@ -141,6 +145,9 @@ test('CRUD', function (t) {
               lv.del('d')
               lv.batch([
                 {type: 'del', key: 'a'},
+                {type: 'del', key: 'ar'},
+                {type: 'del', key: 'b'},
+                {type: 'del', key: 'a'}, // repeated delete
                 {type: 'del', key: 'ar'},
                 {type: 'del', key: 'b'}
               ], function (err) {
