@@ -104,17 +104,19 @@ test('CRUD', function (t) {
     })
   })
 
-  lv.batch([
-    {type: 'put', key: '167', value: 'on99'},
-    {type: 'put', key: 'abc'}, // error
-    {type: 'del', key: '168'}
-  ], function (err) {
-    t.ok(err)
-    lv.get('167', function (err, val) {
-      t.notOk(val, 'batch err not comitted')
-      t.ok(err.notFound, 'batch err not comitted')
+  for (var i = 0; i < 10; i++) {
+    lv.batch([
+      {type: 'put', key: '167', value: 'on99'},
+      {type: 'put', key: 'abc'}, // error
+      {type: 'del', key: '168'}
+    ], function (err) {
+      t.ok(err)
+      lv.get('167', function (err, val) {
+        t.notOk(val, 'err not comitted')
+        t.ok(err.notFound, 'err not comitted')
+      })
     })
-  })
+  }
 
   lv.put('d', 'Rick rolling', function (err) {
     t.notOk(err)
