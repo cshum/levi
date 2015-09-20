@@ -19,7 +19,7 @@ test('clean up', function (t) {
 })
 
 test('pipeline', function (t) {
-  t.plan(7)
+  t.plan(8)
 
   lv.pipeline('including a foo !a!b!c! of instanceof constructor.', function (err, tokens) {
     t.notOk(err)
@@ -48,6 +48,10 @@ test('pipeline', function (t) {
   var cyclic = { a: 'foo', b: { asdf: 'bar' } }
   cyclic.b.boom = cyclic
   lv.pipeline(cyclic, function (err) {
+    t.equal(err.message, 'Cycle detected')
+  })
+
+  lv.put('boom', cyclic, function (err) {
     t.equal(err.message, 'Cycle detected')
   })
 })
