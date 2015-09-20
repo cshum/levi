@@ -70,6 +70,25 @@ test('CRUD', function (t) {
   var aObj = {
     a: 'hello world'
   }
+
+  H('put', lv).pluck('key').take(10).toArray(function (keys) {
+    t.deepEqual(keys, [
+      'a', 'b',
+      'ar', 'c',
+      'ar', 'c',
+      'ar', 'c',
+      'd', 'd'
+    ], 'put emitter')
+    // must not include error operations
+  })
+
+  H('del', lv).pluck('key').take(4).toArray(function (keys) {
+    t.deepEqual(keys, [
+      'ar', 'c', 'c', 'd'
+    ], 'del emitter')
+    // must not include error operations
+  })
+
   lv.put('a', aObj, function () {
     lv.get('a', function (err, value) {
       t.notOk(err)
@@ -139,33 +158,37 @@ test('CRUD', function (t) {
             t.equal(arr[0].key, 'd', 'correct upsert')
             t.equal(arr[0].value, 'Rick Ashley', 'correct upsert')
 
-            lv.meta.get('size', function (err, size) {
-              t.notOk(err)
-              t.equal(size, 5, 'size correct')
-
-              lv.del('c')
-              lv.del('d')
-              lv.batch([
-                {type: 'del', key: 'a'},
-                {type: 'del', key: 'ar'},
-                {type: 'del', key: 'b'},
-                {type: 'del', key: 'a'},
-                {type: 'del', key: 'ar'},
-                {type: 'del', key: 'b'},
-                {type: 'del', key: 'a'}, // repeated delete
-                {type: 'del', key: 'ar'},
-                {type: 'del', key: 'b'}
-              ], function (err) {
-                t.notOk(err)
-                lv.meta.get('size', function (err, size) {
-                  t.notOk(err && !err.notFound)
-                  t.notOk(size, 'empty after delete all')
-                  t.end()
-                })
-              })
-            })
+            t.end()
           })
         })
+      })
+    })
+  })
+})
+
+test('size and tear down', function (t) {
+  lv.meta.get('size', function (err, size) {
+    t.notOk(err)
+    t.equal(size, 5, 'size correct')
+
+    lv.del('c')
+    lv.del('d')
+    lv.batch([
+      {type: 'del', key: 'a'},
+      {type: 'del', key: 'ar'},
+      {type: 'del', key: 'b'},
+      {type: 'del', key: 'a'},
+      {type: 'del', key: 'ar'},
+      {type: 'del', key: 'b'},
+      {type: 'del', key: 'a'}, // repeated delete
+      {type: 'del', key: 'ar'},
+      {type: 'del', key: 'b'}
+    ], function (err) {
+      t.notOk(err)
+      lv.meta.get('size', function (err, size) {
+        t.notOk(err && !err.notFound)
+        t.notOk(size, 'empty after delete all')
+        t.end()
       })
     })
   })
