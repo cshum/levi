@@ -161,7 +161,7 @@ Underlying text processing pipeline of index and query, which extracts text data
 ```js
 lv.pipeline([
   'lorem ipsum is dummy text', 
-  {foo: 'hello', bar: 'printing'}
+  { foo: 'hello', bar: ['printing'] }
 ], function (err, tokens) {
   // tokens
   [ 'lorem', 'ipsum', 'dummi', 'text', 'hello', 'print' ]
