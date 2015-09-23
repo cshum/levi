@@ -109,6 +109,16 @@ test('CRUD', function (t) {
     })
   })
 
+  for (var i = 0; i < 10; i++) {
+    lv.batch([
+      {type: 'put', key: 'on99' + i, value: 'on99'},
+      {type: 'put', key: 'abc'}, // error
+      {type: 'del', key: '167'}
+    ], function (err) {
+      t.ok(err, 'batch error')
+    })
+  }
+
   var ar = ['hello', 'printing', 'a']
   var cText = 'Aldus PageMaker including versions of Lorem Ipsum.'
 
@@ -132,20 +142,6 @@ test('CRUD', function (t) {
       t.equal(value, cText, 'put string')
     })
   })
-
-  for (var i = 0; i < 10; i++) {
-    lv.batch([
-      {type: 'put', key: 'on99' + i, value: 'on99'},
-      {type: 'put', key: 'abc'}, // error
-      {type: 'del', key: '168'}
-    ], function (err) {
-      t.ok(err)
-      lv.get('on99' + i, function (err, val) {
-        t.notOk(val, 'err not comitted')
-        t.ok(err.notFound, 'err not comitted')
-      })
-    })
-  }
 
   lv.put('d', 'Rick rolling', function (err) {
     t.notOk(err)
