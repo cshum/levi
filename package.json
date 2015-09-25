@@ -7,7 +7,6 @@
   "dependencies": {
     "extract-object": "^1.0.0",
     "ginga": "^1.1.1",
-    "group-stream": "^1.0.1",
     "highland": "^2.5.1",
     "level-js": "^2.2.1",
     "level-transactions": "^1.4.3",
@@ -15,7 +14,7 @@
     "levelup": "^1.2.1",
     "ltgt": "^2.1.2",
     "porter-stemmer": "^0.9.1",
-    "sorted-merge-stream": "^1.0.0",
+    "stream-iterate": "^1.1.1",
     "sublevelup": "^3.1.1",
     "xtend": "^4.0.0"
   },
