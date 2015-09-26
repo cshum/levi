@@ -195,17 +195,13 @@ test('size and tear down', function (t) {
 })
 
 test('Search options', function (t) {
-  t.plan(29)
+  t.plan(27)
 
   var live = lv.liveStream('green plant')
   var liveM = lv.liveStream('green plant asdf')
   var liveGt = lv.liveStream('green plant', { gt: 'b' })
-  var live2 = lv.searchStream('watering plant', { fields: { title: 1, body: 10 } })
+  var live2 = lv.liveStream('watering plant', { fields: { title: 1, body: 10 } })
   var live2Lt = lv.liveStream('watering plant', { fields: { title: 1, body: 10 }, lt: 'c' })
-  var live3 = lv.searchStream({
-    title: 'Professor Plumb loves plant',
-    message: 'He has a green plant in his study'
-  })
 
   var list = [{
     id: 'a',
@@ -262,7 +258,7 @@ test('Search options', function (t) {
     })
 
     liveM.pluck('key').take(3).toArray(function (arr) {
-      t.deepEqual(arr, ['a', 'b', 'c'], 'liveStream with missing idf')
+      t.deepEqual(arr, ['a', 'b', 'c'], 'liveM: liveStream with missing idf')
     })
 
     lv.scoreStream('green plant').pluck('key').toArray(function (arr) {
@@ -287,10 +283,10 @@ test('Search options', function (t) {
       t.equal(arr.length, 2, 'field boosting: correct number of results')
       t.equal(arr[0].key, 'c', 'field boosting: correct boosted result')
 
-      live2.take(2).last().pull(function (err, res) {
+      live2.drop(1).pull(function (err, res) {
         t.notOk(err)
-        t.equal(res.score, arr[1].score,
-          'live: last score identical to search score')
+        t.equal(res.score, arr[0].score,
+          'live2: last score identical to search score')
       })
     })
 
@@ -312,11 +308,6 @@ test('Search options', function (t) {
       t.equal(arr.length, 3, 'object search: correct number of results')
       H(arr).pluck('key').toArray(function (arr) {
         t.deepEqual(arr, ['b', 'c', 'a'], 'object search: correct order')
-      })
-      live3.take(3).last().pull(function (err, res) {
-        t.notOk(err)
-        t.equal(res.score, arr[2].score,
-          'live: last score identical to search score')
       })
     })
   })
