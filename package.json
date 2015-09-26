@@ -1,6 +1,6 @@
 {
   "name": "levi",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "Streaming full-text search for Node.js and browser",
   "author": "Adrian C Shum <adrian@cshum.com> (https://github.com/cshum)",
   "main": "lib/levi.js",
@@ -17,7 +17,7 @@
     "porter-stemmer": "^0.9.1",
     "stream-iterate": "^1.1.1",
     "sublevelup": "^3.1.1",
-    "unix-sort-stream": "^1.0.0",
+    "unix-sort-stream": "^1.0.1",
     "xtend": "^4.0.0"
   },
   "browser": {
