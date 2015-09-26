@@ -20,6 +20,9 @@
     "unix-sort-stream": "^1.0.0",
     "xtend": "^4.0.0"
   },
+  "browser": {
+    "leveldown": "level-js"
+  },
   "devDependencies": {
     "beefy": "^2.1.5",
     "browserify": "^10.2.6",
