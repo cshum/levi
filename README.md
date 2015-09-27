@@ -139,20 +139,19 @@ result is of form
 
 ### .scoreStream(query, [options])
 
-Underlying scoring mechanism of `searchStream()`. 
-A highland object stream that calculates relevancy score against `query`, lexicographically sorted by key.
-
+Underlying scoring mechanism of `searchStream()`. Calculates relevancy score of documents against `query`, lexicographically sorted by key.
 Accepts options `fields`, `gt`, `gte`, `lt`, `lte`.
+
+Useful for combining multiple criteria or scoring mechanisms to build a more advanced search.
 
 ### .liveStream(query, [options])
 
 Approximate relevancy score as soon as documents being indexed. 
 A never-ending [highland](http://highlandjs.org/) object stream.
+Accepts options `fields`, `gt`, `gte`, `lt`, `lte`, `values`.
 
 This should be used only when having sufficiently large amount of indexed documents, as relevancy score may be fluctuating at the beginning.
 But very preferable for large amount of live streaming data since `liveStream()` requires almost no database scans, which means significantly faster processing.
-
-Accepts options `fields`, `gt`, `gte`, `lt`, `lte`, `values`.
 
 ### .pipeline(obj, callback)
 
