@@ -142,11 +142,11 @@ result is of form
 Underlying scoring mechanism of `searchStream()`. Calculates relevancy score of documents against `query`, lexicographically sorted by key.
 Accepts options `fields`, `gt`, `gte`, `lt`, `lte`.
 
-Useful for combining multiple criteria or scoring mechanisms to build a more advanced search.
+Useful for combining multiple criteria or scoring mechanisms to build a more advanced search functionality.
 
 ### .liveStream(query, [options])
 
-Approximate relevancy score as soon as documents being indexed. 
+Approximate relevancy score as soon as documents being indexed.
 A never-ending [highland](http://highlandjs.org/) object stream.
 Accepts options `fields`, `gt`, `gte`, `lt`, `lte`, `values`.
 
@@ -155,7 +155,7 @@ But very preferable for large amount of live streaming data since `liveStream()`
 
 ### .pipeline(obj, callback)
 
-Underlying text processing pipeline of index and query, which extracts text data from a serializable `obj` object into tokens.
+Underlying text processing pipeline of index and query, which extracts text tokens from a serializable `obj` object.
 
 ```js
 lv.pipeline([
