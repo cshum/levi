@@ -1,7 +1,6 @@
 var test = require('tape')
 
 var levi = require('../')
-var similarity = require('../lib/util/similarity')
 var H = require('highland')
 
 var lv
@@ -54,20 +53,6 @@ test('pipeline', function (t) {
   lv.put('boom', cyclic, function (err) {
     t.equal(err.message, 'Cycle detected')
   })
-})
-
-test('similarity', function (t) {
-  t.equal(Math.round(similarity(
-    {x: 1, y: 3, z: -5, foo: 0},
-    {x: 4, y: -2, z: -1}
-  ) * 1000) / 1000, 0.111, 'cosine similarity')
-
-  t.equal(similarity(
-    {x: 1, y: 3, z: -5},
-    {x: 0, y: 0, z: 0}
-  ), 0, 'zero magitude vector')
-
-  t.end()
 })
 
 test('CRUD', function (t) {
@@ -171,9 +156,9 @@ test('size and tear down', function (t) {
     t.notOk(err)
     t.equal(size, 5, 'size correct')
 
-    lv.del('c')
-    lv.del('d')
     lv.batch([
+      {type: 'del', key: 'c'},
+      {type: 'del', key: 'd'},
       {type: 'del', key: 'a'},
       {type: 'del', key: 'ar'},
       {type: 'del', key: 'b'},

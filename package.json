@@ -5,6 +5,7 @@
   "author": "Adrian C Shum <adrian@cshum.com> (https://github.com/cshum)",
   "main": "lib/levi.js",
   "dependencies": {
+    "cosine-similarity": "^1.0.0",
     "extract-object": "^1.0.0",
     "ginga": "^1.1.1",
     "group-stream": "^2.0.0",
