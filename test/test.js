@@ -195,7 +195,7 @@ test('size and tear down', function (t) {
 })
 
 test('Search options', function (t) {
-  t.plan(27)
+  t.plan(26)
 
   var live = lv.liveStream('green plant')
   var liveM = lv.liveStream('green plant asdf')
@@ -236,10 +236,6 @@ test('Search options', function (t) {
 
       lv.searchStream(['green', 'plant']).toArray(function (arr2) {
         t.deepEqual(arr2, arr, 'tokenized query')
-      })
-
-      lv.searchStream('green plant', { values: false }).toArray(function (arr) {
-        t.notOk(arr[0].value, 'values: false')
       })
 
       lv.searchStream('green plant', { offset: 1 }).toArray(function (arr2) {
