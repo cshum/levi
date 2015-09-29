@@ -232,7 +232,7 @@ test('Search options', function (t) {
 
     lv.searchStream('green plant').toArray(function (arr) {
       t.equal(arr.length, 3, 'search: correct number of results')
-      t.ok(arr[0].score, 'b', 'search: contains score')
+      t.ok(arr[0].score, 'search: contains score')
       t.equal(arr[0].key, 'b', 'search: correct key')
       t.deepEqual(arr[0].value, list[1], 'search: correct value')
 
