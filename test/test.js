@@ -161,9 +161,11 @@ function tearDown () {
         t.notOk(err)
         t.equal(size, keys.length, 'size correct')
 
-        var tx = transaction(lv.db)
+        // use a non-root db
+        var tx = transaction(lv.db.sublevel('whatever'))
 
         keys.forEach(function (key) {
+          // passing transaction to operations
           lv.del(key, {transaction: tx})
         })
 
