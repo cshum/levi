@@ -1,4 +1,5 @@
 var test = require('tape')
+var ginga = require('ginga')
 
 var levi = require('../')
 var H = require('highland')
@@ -12,6 +13,9 @@ test('clean up', function (t) {
     .use(levi.tokenizer())
     .use(levi.stemmer())
     .use(levi.stopword())
+    .use(ginga().use('pipeline', function (ctx, next) {
+      setTimeout(next, 0) // make pipeline async
+    }))
 
     t.end()
   })
@@ -179,6 +183,53 @@ test('size and tear down', function (t) {
   })
 })
 
+var list = [{
+  id: 'a',
+  title: 'Mr. Green kills Colonel Mustard',
+  body: 'Mr. Green killed Colonel Mustard in the study with the candlestick. ' +
+    'Mr. Green is not a very nice fellow.'
+}, {
+  id: 'b',
+  title: 'Plumb waters plant',
+  body: 'Professor Plumb has a green plant in his study'
+}, {
+  id: 'c',
+  title: 'Scarlett helps Professor',
+  body: 'Miss Scarlett watered Professor Plumbs green plant while he was away ' +
+    'from his office last week.'
+}, {
+  id: 'd',
+  title: 'foo',
+  body: 'bar'
+}]
+
+function tearDown () {
+  test('size and tear down', function (t) {
+    lv.meta.get('size', function (err, size) {
+      t.notOk(err)
+      t.equal(size, 4, 'size correct')
+
+      lv.batch([
+        {type: 'del', key: 'a'},
+        {type: 'del', key: 'b'},
+        {type: 'del', key: 'c'},
+        {type: 'del', key: 'd'}, // repeated delete
+        {type: 'del', key: 'a'},
+        {type: 'del', key: 'b'},
+        {type: 'del', key: 'c'},
+        {type: 'del', key: 'd'}
+      ], function (err) {
+        t.notOk(err)
+        lv.meta.get('size', function (err, size) {
+          t.notOk(err && !err.notFound)
+          t.notOk(size, 'empty after delete all')
+          t.end()
+        })
+      })
+    })
+  })
+}
+
 test('Search options', function (t) {
   t.plan(28)
 
@@ -187,26 +238,6 @@ test('Search options', function (t) {
   var liveGt = lv.liveStream('green plant', { gt: 'b' })
   var live2 = lv.liveStream('watering plant', { fields: { title: 1, body: 10 } })
   var live2Lt = lv.liveStream('watering plant', { fields: { title: 1, body: 10 }, lt: 'c' })
-
-  var list = [{
-    id: 'a',
-    title: 'Mr. Green kills Colonel Mustard',
-    body: 'Mr. Green killed Colonel Mustard in the study with the candlestick. ' +
-      'Mr. Green is not a very nice fellow.'
-  }, {
-    id: 'b',
-    title: 'Plumb waters plant',
-    body: 'Professor Plumb has a green plant in his study'
-  }, {
-    id: 'c',
-    title: 'Scarlett helps Professor',
-    body: 'Miss Scarlett watered Professor Plumbs green plant while he was away ' +
-      'from his office last week.'
-  }, {
-    id: 'd',
-    title: 'foo',
-    body: 'bar'
-  }]
 
   lv.batch(list.map(function (doc) {
     return {type: 'put', key: doc.id, value: doc}
@@ -263,6 +294,7 @@ test('Search options', function (t) {
     })
 
     lv.searchStream('watering plant', { fields: { title: 1, body: 10 } }).toArray(function (arr) {
+      console.log(arr)
       t.equal(arr.length, 2, 'field boosting: correct number of results')
       t.equal(arr[0].key, 'c', 'field boosting: correct boosted result')
 
@@ -295,3 +327,24 @@ test('Search options', function (t) {
     })
   })
 })
+
+tearDown()
+
+/*
+test('Index-time field boost', function (t) {
+  lv.batch(list.map(function (doc) {
+    return {
+      type: 'put',
+      key: doc.id,
+      value: doc,
+      fields: { title: 1, body: 10 }
+    }
+  }), function () {
+    lv.searchStream('watering plant').toArray(function (arr) {
+      console.log(arr)
+      t.equal(arr.length, 2, 'field boosting: correct number of results')
+      t.equal(arr[0].key, 'c', 'field boosting: correct boosted result')
+    })
+  })
+})
+*/
