@@ -294,7 +294,6 @@ test('Search options', function (t) {
     })
 
     lv.searchStream('watering plant', { fields: { title: 1, body: 10 } }).toArray(function (arr) {
-      console.log(arr)
       t.equal(arr.length, 2, 'field boosting: correct number of results')
       t.equal(arr[0].key, 'c', 'field boosting: correct boosted result')
 
@@ -330,21 +329,19 @@ test('Search options', function (t) {
 
 tearDown()
 
-/*
-test('Index-time field boost', function (t) {
+test('Index-time field options', function (t) {
   lv.batch(list.map(function (doc) {
     return {
       type: 'put',
       key: doc.id,
       value: doc,
-      fields: { title: 1, body: 10 }
+      fields: { body: true } // only body is indexed
     }
   }), function () {
     lv.searchStream('watering plant').toArray(function (arr) {
-      console.log(arr)
-      t.equal(arr.length, 2, 'field boosting: correct number of results')
-      t.equal(arr[0].key, 'c', 'field boosting: correct boosted result')
+      t.equal(arr.length, 2, 'field filter: correct number of results')
+      t.equal(arr[0].key, 'c', 'field filter: correct scoring')
+      t.end()
     })
   })
 })
-*/
