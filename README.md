@@ -165,12 +165,15 @@ But very preferable for large amount of live streaming data since `liveStream()`
 Underlying text processing pipeline of index and query, which extracts text tokens from a serializable `obj` object.
 
 ```js
-lv.pipeline([
-  'lorem ipsum is dummy text', 
-  { foo: 'lorem ipsum', bar: ['printing'] }
-], function (err, tokens) {
+lv.pipeline({
+  a: 'foo bar is a placeholder name',
+  b: ['foo', 'bar'],
+  c: 167,
+  d: null,
+  e: { ghjk: ['printing'] }
+}, function (err, tokens) {
   // tokens
-  [ 'lorem', 'ipsum', 'dummi', 'text', 'lorem', 'ipsum', 'print' ]
+  [ 'foo', 'bar', 'placehold', 'name', 'foo', 'bar', 'print' ]
 })
 ```
 

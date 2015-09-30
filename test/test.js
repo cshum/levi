@@ -36,15 +36,15 @@ test('pipeline', function (t) {
   })
 
   lv.pipeline({
-    a: 'foo bar',
-    c: ['hello'],
-    d: { asdf: { ghjk: 'world' } },
-    e: 167,
-    f: null
+    a: 'foo bar is a placeholder name',
+    b: ['foo', 'bar'],
+    c: 167,
+    d: null,
+    e: { ghjk: ['printing'] }
   }, function (err, tokens) {
     t.notOk(err)
     t.deepEqual(tokens, [
-      'foo', 'bar', 'hello', 'world'
+      'foo', 'bar', 'placehold', 'name', 'foo', 'bar', 'print'
     ], 'text extraction from object')
   })
 
