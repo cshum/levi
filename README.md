@@ -48,6 +48,8 @@ These are exposed as [ginga](https://github.com/cshum/ginga) plugins so that the
 Index document identified by `key`. `value` can be object or string.
 Use object fields for `value` if you want field boost options for search.
 
+All fields are indexed by default. Set `options.fields` object to specify fields to be indexed.
+
 ```js
 // string as value
 lv.put('a', 'Lorem Ipsum is simply dummy text.', function (err) { ... })
@@ -58,6 +60,15 @@ lv.put('b', {
   title: 'Lorem Ipsum',
   body: 'Dummy text of the printing and typesetting industry.'
 }, function (err) { ... })
+
+// options.fields
+lv.put('c', {
+  id: 'c',
+  title: 'Hello World',
+  body: 'Bla bla bla'
+}, {
+  fields: { title: true } // index title only
+} function (err) { ... })
 ```
 
 ### .del(key, [options], [callback])
@@ -86,9 +97,7 @@ The main search interface of Levi is a Node compatible [highland](http://highlan
 `query` can be a string or object fields. 
 
 Accepts following options:
-* `fields` object, scoring every fields by default. Set fields for controlling relevancy by
-  * `'*': true`: * any fields, true is identical to 1
-  * `field: boost`: number for multiplying scoring factor of a field.
+* `fields` control field boosts. By default every fields weight equally.
 * `gt` (greater than), `gte` (greater than or equal) define the lower bound of key range to be searched.
 * `lt` (less than), `lte` (less than or equal) define the upper bound of key range to be searched.
 * `offset` number, offset results. Default 0.
@@ -100,11 +109,11 @@ A "more like this" query can be done by searching with document itself.
 lv.searchStream('lorem ipsum').toArray(function (results) { ... }) // highland method
 
 lv.searchStream('lorem ipsum', {
-  fields: { title: 10, '*': 1 } // title field boost
+  fields: { title: 10, '*': 1 } // title field boost. '*' means any field
 }).pipe(...)
 
 lv.searchStream('lorem ipusm', {
-  fields: { title: true }, // title only
+  fields: { title: 1 }, // title only
 }).pipe(...)
 
 // ltgt
@@ -158,10 +167,10 @@ Underlying text processing pipeline of index and query, which extracts text toke
 ```js
 lv.pipeline([
   'lorem ipsum is dummy text', 
-  { foo: 'hello', bar: ['printing'] }
+  { foo: 'lorem ipsum', bar: ['printing'] }
 ], function (err, tokens) {
   // tokens
-  [ 'lorem', 'ipsum', 'dummi', 'text', 'hello', 'print' ]
+  [ 'lorem', 'ipsum', 'dummi', 'text', 'lorem', 'ipsum', 'print' ]
 })
 ```
 

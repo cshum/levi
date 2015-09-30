@@ -14,7 +14,7 @@ test('clean up', function (t) {
     .use(levi.stemmer())
     .use(levi.stopword())
     .use(ginga().use('pipeline', function (ctx, next) {
-      setTimeout(next, 0) // make pipeline async
+      setTimeout(next, 1) // make pipeline async
     }))
 
     t.end()
