@@ -1,5 +1,6 @@
 var test = require('tape')
 var ginga = require('ginga')
+var transaction = require('level-transactions')
 
 var levi = require('../')
 var H = require('highland')
@@ -160,14 +161,13 @@ function tearDown () {
         t.notOk(err)
         t.equal(size, keys.length, 'size correct')
 
-        lv.batch([].concat(
-          keys, keys, keys // repeated delete
-        ).map(function (key) {
-          return {
-            type: 'del',
-            key: key
-          }
-        }), function (err) {
+        var tx = transaction(lv.db)
+
+        keys.forEach(function (key) {
+          lv.del(key, {transaction: tx})
+        })
+
+        tx.commit(function (err) {
           t.notOk(err)
           lv.meta.get('size', function (err, size) {
             t.notOk(err && !err.notFound)
@@ -319,4 +319,3 @@ test('Index-time field options', function (t) {
 })
 
 tearDown()
-
