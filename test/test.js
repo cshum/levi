@@ -75,10 +75,8 @@ test('CRUD', function (t) {
     // must not include error operations
   })
 
-  H('del', lv).pluck('key').take(4).toArray(function (keys) {
-    t.deepEqual(keys, [
-      'ar', 'c', 'c', 'd'
-    ], 'del emitter')
+  H('del', lv).pluck('key').take(2).toArray(function (keys) {
+    t.deepEqual(keys, ['ar', 'c'], 'del emitter')
     // must not include error operations
   })
 
@@ -155,33 +153,34 @@ test('CRUD', function (t) {
   })
 })
 
-test('size and tear down', function (t) {
-  lv.meta.get('size', function (err, size) {
-    t.notOk(err)
-    t.equal(size, 5, 'size correct')
-
-    lv.batch([
-      {type: 'del', key: 'c'},
-      {type: 'del', key: 'd'},
-      {type: 'del', key: 'a'},
-      {type: 'del', key: 'ar'},
-      {type: 'del', key: 'b'},
-      {type: 'del', key: 'a'},
-      {type: 'del', key: 'ar'},
-      {type: 'del', key: 'b'},
-      {type: 'del', key: 'a'}, // repeated delete
-      {type: 'del', key: 'ar'},
-      {type: 'del', key: 'b'}
-    ], function (err) {
-      t.notOk(err)
+function tearDown () {
+  test('size and tear down', function (t) {
+    lv.readStream().pluck('key').toArray(function (keys) {
       lv.meta.get('size', function (err, size) {
-        t.notOk(err && !err.notFound)
-        t.notOk(size, 'empty after delete all')
-        t.end()
+        t.notOk(err)
+        t.equal(size, keys.length, 'size correct')
+
+        lv.batch([].concat(
+          keys, keys, keys // repeated delete
+        ).map(function (key) {
+          return {
+            type: 'del',
+            key: key
+          }
+        }), function (err) {
+          t.notOk(err)
+          lv.meta.get('size', function (err, size) {
+            t.notOk(err && !err.notFound)
+            t.notOk(size, 'empty after delete all')
+            t.end()
+          })
+        })
       })
     })
   })
-})
+}
+
+tearDown()
 
 var list = [{
   id: 'a',
@@ -202,33 +201,6 @@ var list = [{
   title: 'foo',
   body: 'bar'
 }]
-
-function tearDown () {
-  test('size and tear down', function (t) {
-    lv.meta.get('size', function (err, size) {
-      t.notOk(err)
-      t.equal(size, 4, 'size correct')
-
-      lv.batch([
-        {type: 'del', key: 'a'},
-        {type: 'del', key: 'b'},
-        {type: 'del', key: 'c'},
-        {type: 'del', key: 'd'}, // repeated delete
-        {type: 'del', key: 'a'},
-        {type: 'del', key: 'b'},
-        {type: 'del', key: 'c'},
-        {type: 'del', key: 'd'}
-      ], function (err) {
-        t.notOk(err)
-        lv.meta.get('size', function (err, size) {
-          t.notOk(err && !err.notFound)
-          t.notOk(size, 'empty after delete all')
-          t.end()
-        })
-      })
-    })
-  })
-}
 
 test('Search options', function (t) {
   t.plan(28)
@@ -345,3 +317,6 @@ test('Index-time field options', function (t) {
     })
   })
 })
+
+tearDown()
+
