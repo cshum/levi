@@ -262,7 +262,7 @@ test('Search options', function (t) {
       })
     })
 
-    lv.searchStream('green', { fields: { title: true } }).toArray(function (arr) {
+    lv.searchStream('green', { fields: ['title'] }).toArray(function (arr) {
       t.equal(arr.length, 1, 'fielded: correct number of results')
       t.equal(arr[0].key, 'a', 'fielded: correct result')
     })
