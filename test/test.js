@@ -304,12 +304,14 @@ test('Search options', function (t) {
 tearDown()
 
 test('Index-time field options', function (t) {
-  lv.batch(list.map(function (doc) {
+  lv.batch(list.map(function (doc, i) {
     return {
       type: 'put',
       key: doc.id,
       value: doc,
-      fields: { body: true } // only body is indexed
+      fields: i % 2 === 0
+        ? { body: true } // obj field
+        : ['body'] // array field
     }
   }), function () {
     lv.searchStream('watering plant').toArray(function (arr) {
