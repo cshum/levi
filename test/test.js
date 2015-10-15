@@ -205,7 +205,7 @@ var list = [{
 }]
 
 test('Search options', function (t) {
-  t.plan(28)
+  t.plan(29)
 
   var live = lv.liveStream('green plant')
   var liveM = lv.liveStream('green plant asdf')
@@ -242,6 +242,10 @@ test('Search options', function (t) {
         t.notOk(err)
         t.equal(res.score, arr[2].score,
           'live: last score identical to search score')
+      })
+
+      lv.searchStream('green pla', { expansions: 10 }).toArray(function (arr2) {
+        t.deepEqual(arr2, arr, 'expansions')
       })
     })
 
