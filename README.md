@@ -102,6 +102,7 @@ Accepts following options:
 * `lt` (less than), `lte` (less than or equal) define the upper bound of key range to be searched.
 * `offset` number, offset results. Default 0.
 * `limit` number, limit number of results. Default infinity.
+* `expansions` number, maximum expansions of prefix matching for "search as you type" behaviour. Default 0.
 
 A "more like this" query can be done by searching with document itself.
 
@@ -128,6 +129,11 @@ lv.searchStream({
   body: 'Dummy text of the printing and typesetting industry.'
 }).pipe(...)
 
+// maximum 10 expansions. 'ips' may also match 'ipso', 'ipsum' etc.
+lv.searchStream('lorem ips', {
+  expansions: 10
+}).pipe(...)
+
 ```
 
 result is of form
@@ -147,7 +153,7 @@ result is of form
 ### .scoreStream(query, [options])
 
 Underlying scoring mechanism of `searchStream()`. Calculates relevancy score of documents against `query`, lexicographically sorted by key.
-Accepts options `fields`, `gt`, `gte`, `lt`, `lte`.
+Accepts options `fields`, `gt`, `gte`, `lt`, `lte`, `expansions`.
 
 Useful for combining multiple criteria or scoring mechanisms to build a more advanced search functionality.
 
