@@ -1,6 +1,6 @@
 {
   "name": "levi",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Streaming full-text search for Node.js and browser",
   "author": "Adrian C Shum <adrian@cshum.com> (https://github.com/cshum)",
   "main": "lib/levi.js",
@@ -10,8 +10,8 @@
     "ginga": "^1.1.1",
     "group-stream": "^2.0.0",
     "highland": "^2.5.1",
-    "level-js": "^2.2.1",
-    "level-transactions": "^1.4.3",
+    "level-js": "^2.2.2",
+    "level-transactions": "^1.4.5",
     "leveldown": "^1.4.1",
     "levelup": "^1.2.1",
     "ltgt": "^2.1.2",
