@@ -11,7 +11,7 @@
     "group-stream": "^2.0.0",
     "highland": "^2.5.1",
     "level-js": "^2.2.2",
-    "level-transactions": "^1.4.5",
+    "level-transactions": "^1.5.0",
     "leveldown": "^1.4.1",
     "levelup": "^1.2.1",
     "ltgt": "^2.1.2",
