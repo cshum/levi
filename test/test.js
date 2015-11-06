@@ -205,13 +205,7 @@ var list = [{
 }]
 
 test('Search options', function (t) {
-  t.plan(29)
-
-  var live = lv.liveStream('green plant')
-  var liveM = lv.liveStream('green plant asdf')
-  var liveGt = lv.liveStream('green plant', { gt: 'b' })
-  var live2 = lv.liveStream('watering plant', { fields: { title: 1, body: 10 } })
-  var live2Lt = lv.liveStream('watering plant', { fields: { title: 1, body: 10 }, lt: 'c' })
+  t.plan(20)
 
   lv.batch(list.map(function (doc) {
     return {type: 'put', key: doc.id, value: doc}
@@ -238,19 +232,9 @@ test('Search options', function (t) {
         t.deepEqual(arr2, arr.slice(0, 1), 'limit')
       })
 
-      live.take(3).last().pull(function (err, res) {
-        t.notOk(err)
-        t.equal(res.score, arr[2].score,
-          'live: last score identical to search score')
-      })
-
       lv.searchStream('green pla', { expansions: 10 }).toArray(function (arr2) {
         t.deepEqual(arr2, arr, 'expansions')
       })
-    })
-
-    liveM.pluck('key').take(3).toArray(function (arr) {
-      t.deepEqual(arr, ['a', 'b', 'c'], 'liveM: liveStream with missing idf')
     })
 
     lv.scoreStream('green plant').pluck('key').toArray(function (arr) {
@@ -260,10 +244,6 @@ test('Search options', function (t) {
     lv.searchStream('green plant', { gt: 'b' }).toArray(function (arr) {
       t.equal(arr.length, 1, 'gt correct # of result')
       t.equal(arr[0].key, 'c', 'gt correct first result')
-      liveGt.take(1).last().pull(function (err, res) {
-        t.notOk(err)
-        t.equal(res.score, arr[0].score, 'live: last score identical to search gt score')
-      })
     })
 
     lv.searchStream('green', { fields: ['title'] }).toArray(function (arr) {
@@ -274,23 +254,11 @@ test('Search options', function (t) {
     lv.searchStream('watering plant', { fields: { title: 1, body: 10 } }).toArray(function (arr) {
       t.equal(arr.length, 2, 'field boosting: correct number of results')
       t.equal(arr[0].key, 'c', 'field boosting: correct boosted result')
-
-      live2.drop(1).pull(function (err, res) {
-        t.notOk(err)
-        t.equal(res.score, arr[0].score,
-          'live2: last score identical to search score')
-      })
     })
 
     lv.searchStream('watering plant', { fields: { title: 1, body: 10 }, lt: 'c' }).toArray(function (arr) {
       t.equal(arr.length, 1, 'upper bound: correct number of results')
       t.equal(arr[0].key, 'b', 'upper bound: correct boosted result')
-
-      live2Lt.take(1).last().pull(function (err, res) {
-        t.notOk(err)
-        t.equal(res.score, arr[0].score,
-          'upper bound: last score identical to search score')
-      })
     })
 
     lv.searchStream({

@@ -17,10 +17,6 @@ Levi is built on [LevelUP](https://github.com/Level/levelup) - a fast, asynchron
 By default, it uses [LevelDB](https://github.com/Level/leveldown) on Node.js and [IndexedDB](https://github.com/maxogden/level.js) on browser. 
 Also works with a variety of LevelDOWN compatible backends.
 
-In addition, Levi provides relevancy scoring for live changing data using [TF-ICF](http://cda.ornl.gov/publications/ICMLA06.pdf) - a TF-IDF approximation based on existing corpus.
-Such scoring matches comparably close to TF-IDF when existing corpus is sufficiently large,
-with significantly better performance O(N) instead of O(N^2).
-
 ## API
 
 ### levi(path, [options])
@@ -156,15 +152,6 @@ Underlying scoring mechanism of `searchStream()`. Calculates relevancy score of 
 Accepts options `fields`, `gt`, `gte`, `lt`, `lte`, `expansions`.
 
 Useful for combining multiple criteria or scoring mechanisms to build a more advanced search functionality.
-
-### .liveStream(query, [options])
-
-Approximate relevancy score as soon as documents being indexed.
-A never-ending [highland](http://highlandjs.org/) object stream.
-Accepts options `fields`, `gt`, `gte`, `lt`, `lte`.
-
-This should be used only when having sufficiently large amount of indexed documents, as relevancy score may be fluctuating at the beginning.
-But very preferable for large amount of live streaming data since `liveStream()` requires almost no database scans, which means significantly faster processing.
 
 ### .pipeline(obj, callback)
 

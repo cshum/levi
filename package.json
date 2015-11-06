@@ -7,7 +7,7 @@
   "dependencies": {
     "cosine-similarity": "^1.0.0",
     "extract-object": "^1.0.0",
-    "ginga": "^1.1.1",
+    "ginga": "^2.0.2",
     "group-stream": "^2.0.0",
     "highland": "^2.5.1",
     "level-js": "^2.2.2",
