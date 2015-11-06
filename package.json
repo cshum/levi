@@ -1,6 +1,6 @@
 {
   "name": "levi",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Streaming full-text search for Node.js and browser",
   "author": "Adrian C Shum <adrian@cshum.com> (https://github.com/cshum)",
   "main": "lib/levi.js",
