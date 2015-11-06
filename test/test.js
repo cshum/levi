@@ -23,7 +23,7 @@ test('clean up', function (t) {
 })
 
 test('pipeline', function (t) {
-  t.plan(8)
+  t.plan(7)
 
   lv.pipeline('including a foo !a!b!c! of instanceof constructor.', function (err, tokens) {
     t.notOk(err)
@@ -42,20 +42,24 @@ test('pipeline', function (t) {
     c: 167,
     d: null,
     e: { ghjk: ['printing'] }
-  }, function (err, tokens) {
-    t.notOk(err)
+  }).then(function (tokens) {
     t.deepEqual(tokens, [
       'foo', 'bar', 'placehold', 'name', 'foo', 'bar', 'print'
     ], 'text extraction from object')
+  }).catch(function (err) {
+    t.error(err)
   })
 
   var cyclic = { a: 'foo', b: { asdf: 'bar' } }
   cyclic.b.boom = cyclic
+
   lv.pipeline(cyclic, function (err) {
     t.equal(err.message, 'Cycle detected')
   })
 
-  lv.put('boom', cyclic, function (err) {
+  lv.put('boom', cyclic).then(function () {
+    t.error(true)
+  }).catch(function (err) {
     t.equal(err.message, 'Cycle detected')
   })
 })

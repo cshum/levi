@@ -46,6 +46,8 @@ Use object fields for `value` if you want field boost options for search.
 
 All fields are indexed by default. Set `options.fields` object to specify fields to be indexed.
 
+Callback with error or result. Returns a promise if no callback function given.
+
 ```js
 // string as value
 lv.put('a', 'Lorem Ipsum is simply dummy text.', function (err) { ... })
@@ -64,15 +66,19 @@ lv.put('c', {
   body: 'Bla bla bla'
 }, {
   fields: { title: true } // index title only
-} function (err) { ... })
+}).then(...) // returns promise if no callback function
 ```
 
 ### .del(key, [options], [callback])
 Delete document `key` from index.
 
+Callback with error or result. Returns a promise if no callback function given.
+
 ### .batch(array, [options], [callback])
 Atomic bulk-write operations put and del, 
 similar to LevelUP's array form of [`batch()`](https://github.com/Level/levelup#batch)
+
+Callback with error or result. Returns a promise if no callback function given.
 
 ```js
 lv.batch([
@@ -83,6 +89,8 @@ lv.batch([
 
 ### .get(key, [options], [callback])
 Fetch value from the store. Works exactly like LevelUP's [`get()`](https://github.com/Level/levelup#get)
+
+Callback with error or result. Returns a promise if no callback function given.
 
 ### .readStream([options])
 Obtain a ReadStream of documents, lexicographically sorted by key.
@@ -156,6 +164,8 @@ Useful for combining multiple criteria or scoring mechanisms to build a more adv
 ### .pipeline(obj, callback)
 
 Underlying text processing pipeline of index and query, which extracts text tokens from a serializable `obj` object.
+
+Callback with error or result. Returns a promise if no callback function given.
 
 ```js
 lv.pipeline({
