@@ -66,7 +66,7 @@ lv.put('c', {
   body: 'Bla bla bla'
 }, {
   fields: { title: true } // index title only
-}).then(...) // returns promise if no callback function
+}).then(...).catch(...) // returns promise if no callback function
 ```
 
 ### .del(key, [options], [callback])
