@@ -8,14 +8,15 @@ Stream based full-text search for Node.js and browsers. Using LevelDB as storage
 npm install levi
 ```
 
-Full-text search using TF-IDF and cosine similarity. 
-Stream based query mechanism plus query-time field boost options, designed to be memory efficient.
+Full-text search using TF-IDF and cosine similarity plus query-time field boost options. 
 Provided with configurable text processing pipeline: Tokenizer, Porter Stemmer and Stopwords filter.
 
 Levi is built on [LevelUP](https://github.com/Level/levelup) - a fast, asynchronous, 
 [transactional](https://github.com/cshum/level-transactions/) storage interface.
 By default, it uses [LevelDB](https://github.com/Level/leveldown) on Node.js and [IndexedDB](https://github.com/maxogden/level.js) on browser. 
 Also works with a variety of LevelDOWN compatible backends.
+
+Using stream based query mechanism [highland](http://highlandjs.org/), Levi is designed to be memory efficient and extensible with custom document scoring mechanisms.
 
 ## API
 
