@@ -16,7 +16,7 @@ Levi is built on [LevelUP](https://github.com/Level/levelup) - a fast, asynchron
 By default, it uses [LevelDB](https://github.com/Level/leveldown) on Node.js and [IndexedDB](https://github.com/maxogden/level.js) on browser. 
 Also works with a variety of LevelDOWN compatible backends.
 
-Using stream based query mechanism [highland](http://highlandjs.org/), Levi is designed to be memory efficient and extensible with custom document scoring mechanisms.
+Using stream based query mechanism with [Highland](http://highlandjs.org/), Levi is designed to be memory efficient, and extensible by combining multiple scoring mechanisms.
 
 ## API
 
