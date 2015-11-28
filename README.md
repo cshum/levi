@@ -1,6 +1,6 @@
 # Levi
 
-Streaming full-text search for Node.js and browsers. Using LevelDB as storage backend.
+Stream based full-text search for Node.js and browsers. Using LevelDB as storage backend.
 
 [![Build Status](https://travis-ci.org/cshum/levi.svg?branch=master)](https://travis-ci.org/cshum/levi)
 
@@ -9,7 +9,7 @@ npm install levi
 ```
 
 Full-text search using TF-IDF and cosine similarity. 
-Stream based query mechanism plus query-time field boost options. 
+Stream based query mechanism plus query-time field boost options, designed to be memory efficient.
 Provided with configurable text processing pipeline: Tokenizer, Porter Stemmer and Stopwords filter.
 
 Levi is built on [LevelUP](https://github.com/Level/levelup) - a fast, asynchronous, 
