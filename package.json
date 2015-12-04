@@ -14,8 +14,8 @@
     "level-transactions": "^1.5.1",
     "leveldown": "^1.4.1",
     "levelup": "^1.2.1",
-    "porter-stemmer": "^0.9.1",
     "sorted-merge-stream": "^1.0.0",
+    "stemmer": "^0.1.4",
     "stream-iterate": "^1.1.1",
     "sublevelup": "^3.1.2",
     "xtend": "^4.0.0"
