@@ -47,7 +47,7 @@ Use object fields for `value` if you want field boost options for search.
 
 All fields are indexed by default. Set `options.fields` object to specify fields to be indexed.
 
-Returns promise if no callback function is given.
+Accepts optional callback function or returns a promise.
 
 ```js
 // string as value
@@ -73,13 +73,13 @@ lv.put('c', {
 ### .del(key, [options], [callback])
 Delete document `key` from index.
 
-Returns promise if no callback function is given.
+Accepts optional callback function or returns a promise.
 
 ### .batch(array, [options], [callback])
 Atomic bulk-write operations put and del, 
 similar to LevelUP's array form of [`batch()`](https://github.com/Level/levelup#batch)
 
-Returns promise if no callback function is given.
+Accepts optional callback function or returns a promise.
 
 ```js
 lv.batch([
@@ -91,7 +91,7 @@ lv.batch([
 ### .get(key, [options], [callback])
 Fetch value from the store. Works exactly like LevelUP's [`get()`](https://github.com/Level/levelup#get)
 
-Returns promise if no callback function is given.
+Accepts optional callback function or returns a promise.
 
 ### .readStream([options])
 Obtain a ReadStream of documents, lexicographically sorted by key.
@@ -166,7 +166,7 @@ Useful for combining multiple criteria or scoring mechanisms to build a more adv
 
 Underlying text processing pipeline of index and query, which extracts text tokens from a serializable `obj` object.
 
-Returns promise if no callback function is given.
+Accepts optional callback function or returns a promise.
 
 ```js
 lv.pipeline({
@@ -188,6 +188,8 @@ which deletes the database directory on Node.js
 or deletes the IndexedDB database on browser.
 
 If you are using a custom Level backend, you need to invoke its corresponding `destroy()` function to remove database properly.
+
+Accepts optional callback function or returns a promise.
 
 ## License
 
