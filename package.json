@@ -9,7 +9,7 @@
     "extract-object": "^1.0.0",
     "ginga": "^2.0.2",
     "group-stream": "^2.0.0",
-    "highland": "^2.5.1",
+    "highland": "^2.6.0",
     "level-js": "^2.2.2",
     "level-transactions": "^1.5.1",
     "leveldown": "^1.4.1",
