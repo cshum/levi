@@ -1,6 +1,6 @@
 {
   "name": "levi",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Stream based full-text search for Node.js and browser. Using LevelDB as storage backend.",
   "author": "Adrian C Shum <adrian@cshum.com> (https://github.com/cshum)",
   "main": "lib/levi.js",
