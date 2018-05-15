@@ -12,7 +12,7 @@
     "highland": "^2.9.0",
     "level-js": "^2.2.4",
     "level-transactions": "^2.0.0",
-    "leveldown": "^1.4.6",
+    "leveldown": "^3.0.2",
     "levelup": "^1.3.2",
     "sorted-merge-stream": "^1.0.0",
     "stemmer": "^0.1.4",
